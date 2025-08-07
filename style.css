@@ -1,0 +1,243 @@
+/* Основний шрифт для всього документа */
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Ефект "підняття" для карток на панелі */
+.dashboard-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* Стилізація модального вікна */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 50;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    width: 90%;
+    max-width: 500px;
+}
+
+/* Стилізація смуги прокрутки */
+::-webkit-scrollbar { 
+    width: 8px; 
+}
+
+::-webkit-scrollbar-track { 
+    background: #f1f1f1; 
+}
+
+::-webkit-scrollbar-thumb { 
+    background: #888; 
+    border-radius: 4px; 
+}
+
+::-webkit-scrollbar-thumb:hover { 
+    background: #555; 
+}
+
+/* Стилі для власного календаря */
+.custom-calendar {
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.calendar-day-header {
+    text-align: center;
+    font-weight: 600;
+    color: #6b7280;
+    font-size: 14px;
+    padding: 8px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.calendar-day.available {
+    background: #f3f4f6;
+    color: #1f2937;
+}
+
+.calendar-day.available:hover {
+    background: #10b981;
+    color: white;
+}
+
+.calendar-day.selected {
+    background: #10b981;
+    color: white;
+    font-weight: 600;
+}
+
+.calendar-day.disabled {
+    color: #d1d5db;
+    cursor: not-allowed;
+}
+
+.calendar-day.today {
+    border: 2px solid #10b981;
+}
+
+.calendar-nav-btn {
+    background: none;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.calendar-nav-btn:hover {
+    background: #f3f4f6;
+}
+
+.time-slot {
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+}
+
+.time-slot:hover:not(.booked) {
+    background: #10b981;
+    color: white;
+    border-color: #10b981;
+}
+
+.time-slot.booked {
+    background: #fee2e2;
+    color: #dc2626;
+    cursor: not-allowed;
+}
+
+/* Нові стилі для календаря адміністратора */
+.admin-calendar-grid {
+    grid-auto-rows: minmax(120px, auto); /* Робимо клітинки вищими */
+}
+
+.admin-calendar-day {
+    border: 1px solid #e5e7eb;
+    padding: 4px;
+    font-size: 12px;
+    cursor: pointer; /* <-- Додай цей рядок */
+    transition: background-color 0.2s; /* Додамо плавний ефект */
+}
+
+.admin-calendar-day:hover {
+    background-color: #f9fafb; /* Дуже світло-сірий */
+}
+
+.admin-calendar-day .day-number {
+    font-weight: 600;
+    color: #6b7280;
+    text-align: right;
+    margin-bottom: 4px;
+}
+
+.admin-calendar-appointment {
+    background-color: #dbeafe; /* Синій фон */
+    color: #1e40af; /* Темно-синій текст */
+    padding: 2px 4px;
+    border-radius: 4px;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-calendar-more-link {
+    font-size: 11px;
+    text-align: center;
+    color: #4f46e5; /* indigo-600 */
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.admin-calendar-more-link:hover {
+    text-decoration: underline;
+}
+
+/* --- Нові стилі для вкладок в модальному вікні --- */
+
+/* Контейнер для кнопок-вкладок */
+.tab-container {
+    display: flex;
+    border-bottom: 2px solid #e5e7eb; /* Світло-сіра лінія під вкладками */
+    margin-bottom: 1.5rem; /* Відступ від контенту */
+}
+
+/* Стиль для кожної кнопки-вкладки */
+.tab-button {
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+    color: #6b7280; /* Сірий колір для неактивної вкладки */
+    font-weight: 500;
+    font-size: 0.875rem; /* 14px */
+    border-bottom: 2px solid transparent; /* Прозора лінія для ефекту */
+    margin-bottom: -2px; /* Накладаємо на основну лінію */
+    transition: all 0.2s;
+}
+
+/* Стиль для кнопки при наведенні */
+.tab-button:hover {
+    color: #111827; /* Темно-сірий колір */
+}
+
+/* Стиль для АКТИВНОЇ кнопки-вкладки */
+.tab-button.active {
+    color: #4f46e5; /* Наш фірмовий індиго */
+    border-bottom-color: #4f46e5; /* Кольорова лінія під активною вкладкою */
+}
+
+/* Контейнер для вмісту вкладок */
+.tab-content {
+    display: none; /* За замовчуванням весь вміст прихований */
+}
+
+/* Клас, який робить вміст вкладки видимим */
+.tab-content.active {
+    display: block;
+}

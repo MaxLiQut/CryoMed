@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zarządzanie Karnetami</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body class="bg-gray-100 text-gray-800">
+
+    <div id="loginScreen" class="flex items-center justify-center min-h-screen">
+        <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
+            <h1 class="text-2xl font-bold text-center">Logowanie do systemu</h1>
+            <div class="flex flex-col space-y-4">
+                <button id="loginAdminBtn"
+                    class="w-full px-4 py-2 font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Zaloguj
+                    jako Administrator</button>
+                <button id="loginClientBtn"
+                    class="w-full px-4 py-2 font-semibold text-white bg-green-600 rounded-md hover:bg-green-700">Zaloguj
+                    jako Klient</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="adminDashboard" class="hidden">
+        <header class="bg-white shadow-md">
+            <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+                <h1 class="text-xl font-bold text-indigo-600">Panel Administratora</h1>
+                <button id="logoutAdminBtn"
+                    class="text-sm font-medium text-gray-600 hover:text-indigo-600">Wyloguj</button>
+            </div>
+        </header>
+        <main class="container mx-auto p-6">
+            <div id="stats-container" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6"></div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-semibold">Lista klientów</h2>
+                        <div class="flex items-center space-x-2">
+                            <input type="text" id="searchInput" placeholder="Szukaj po nazwisku..."
+                                class="px-3 py-1 border border-gray-300 rounded-md text-sm">
+                            <select id="filterSelect" class="px-3 py-1 border border-gray-300 rounded-md text-sm">
+                                <option value="all">Wszyscy</option>
+                                <option value="expiresSoon">Karnet kończy się wkrótce</option>
+                                <option value="lowEntries">Mało wejść</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="clients-list-container" class="space-y-4"></div>
+                    <button id="addClientBtn"
+                        class="mt-6 w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg">Zarejestruj
+                        nowego klienta</button>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h2 class="text-lg font-semibold mb-4">Wnioski od klientów</h2>
+                    <div id="requests-container" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <div class="mt-6 bg-white p-6 rounded-xl shadow-lg dashboard-card">
+                <h2 class="text-lg font-semibold mb-4">Kalendarz wizyt</h2>
+
+                <div id="admin-calendar-container">
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="clientDashboard" class="hidden">
+        <header class="bg-white shadow-md">
+            <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+                <h1 class="text-xl font-bold text-emerald-600">Panel Klienta</h1>
+                <button id="logoutClientBtn"
+                    class="text-sm font-medium text-gray-600 hover:text-emerald-600">Wyloguj</button>
+            </div>
+        </header>
+        <main class="container mx-auto p-6">
+            <div id="client-info-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+
+            <div class="mt-6 bg-white p-6 rounded-xl shadow-lg dashboard-card">
+                <h2 class="text-lg font-semibold mb-4">Moje zaplanowane wizyty</h2>
+
+                <div id="appointments-list" class="space-y-3">
+                </div>
+            </div>
+            <div class="mt-6 bg-white p-6 rounded-xl shadow-lg dashboard-card">
+                <h2 class="text-lg font-semibold mb-4">Zarezerwuj wizytę</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div id="booking-calendar" class="custom-calendar"></div>
+                    <div>
+                        <h3 class="text-md font-semibold mb-2">Dostępne godziny:</h3>
+                        <div id="time-slots-container" class="space-y-2">
+                            <p class="text-sm text-gray-500">Wybierz datę z kalendarza, aby zobaczyć dostępne terminy.
+                            </p>
+                        </div>
+                        <div class="mt-4 text-center border-t pt-4">
+                            <p class="text-sm text-gray-600 mb-2">Nie znalazłeś dogodnego terminu?</p>
+                            <button id="requestSpecialTermBtn"
+                                class="text-sm text-indigo-600 hover:underline font-semibold">
+                                Zaproponuj własny
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="manageClientModal" class="modal-backdrop hidden flex justify-center items-center">
+        <div class="modal-content max-w-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium leading-6 text-gray-900" id="manageClientModalTitle"></h3>
+                <button id="closeManageClientModalBtn" type="button" class="text-gray-400 hover:text-gray-600">
+                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="manageClientModalBody"></div>
+        </div>
+    </div>
+
+    <div id="deleteConfirmModal" class="modal-backdrop hidden flex justify-center items-center">
+        <div class="modal-content max-w-md">
+            <h3 class="text-lg font-medium leading-6 text-gray-900">Potwierdź usunięcie</h3>
+            <div class="mt-2">
+                <p class="text-sm text-gray-500" id="deleteConfirmText"></p>
+            </div>
+            <div class="mt-4 flex justify-end space-x-3">
+                <button id="cancelDeleteBtn" type="button"
+                    class="bg-white py-2 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">Anuluj</button>
+                <button id="confirmDeleteBtn" type="button"
+                    class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700">Usuń</button>
+            </div>
+        </div>
+    </div>
+    <div id="specialTermModal" class="modal-backdrop hidden flex justify-center items-center">
+        <div class="modal-content max-w-md">
+            <h3 class="text-lg font-medium leading-6 text-gray-900">Zaproponuj termin wizyty</h3>
+            <form id="specialTermForm" class="mt-4 space-y-4">
+                <div>
+                    <label for="specialDate" class="block text-sm font-medium text-gray-700">Wybierz datę</label>
+                    <input type="date" id="specialDate" name="specialDate" required
+                        class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md">
+                </div>
+                <div>
+                    <label for="specialTime" class="block text-sm font-medium text-gray-700">Wybierz godzinę</label>
+                    <input type="time" id="specialTime" name="specialTime" required
+                        class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md">
+                </div>
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button type="button" id="cancelSpecialTermBtn"
+                        class="bg-white py-2 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">Anuluj</button>
+                    <button type="submit"
+                        class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">Wyślij
+                        prośbę</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="proposeTimeModal" class="modal-backdrop hidden flex justify-center items-center">
+        <div class="modal-content max-w-md">
+            <h3 class="text-lg font-medium leading-6 text-gray-900">Zaproponuj nowy termin</h3>
+            <form id="proposeTimeForm" class="mt-4 space-y-4">
+                <input type="hidden" id="requestIndexInput" name="requestIndex">
+
+                <div>
+                    <label for="proposeDate" class="block text-sm font-medium text-gray-700">Nowa data</label>
+                    <input type="date" id="proposeDate" name="proposeDate" required
+                        class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md">
+                </div>
+                <div>
+                    <label for="proposeTime" class="block text-sm font-medium text-gray-700">Nowa godzina</label>
+                    <input type="time" id="proposeTime" name="proposeTime" required
+                        class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md">
+                </div>
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button type="button" id="cancelProposeTimeBtn"
+                        class="bg-white py-2 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">Anuluj</button>
+                    <button type="submit"
+                        class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">Wyślij
+                        propozycję</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="dayDetailsModal" class="modal-backdrop hidden flex justify-center items-center">
+        <div class="modal-content max-w-lg">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium leading-6 text-gray-900" id="dayDetailsModalTitle">Wizyty na dzień</h3>
+                <button type="button" id="closeDayDetailsModalBtn" class="text-gray-400 hover:text-gray-600">
+                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div id="dayDetailsModalBody" class="mt-2 max-h-96 overflow-y-auto pr-2 space-y-3">
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+
+</html>
