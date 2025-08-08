@@ -31,46 +31,131 @@ export function renderRequests() {
     const { requests } = state;
     const requestsContainer = document.getElementById('requests-container');
     if (!requestsContainer) return;
+
     if (requests.length === 0) {
         requestsContainer.innerHTML = `<p class="text-sm text-gray-500">Brak nowych wniosków.</p>`;
         return;
     }
-    requestsContainer.innerHTML = requests.map((req, index) => {
-        let bgColor = 'bg-blue-100';
-        if (req.type === 'Termin Specjalny') bgColor = 'bg-yellow-100';
-        if (req.status === 'pending_client_approval') bgColor = 'bg-purple-100';
-        return `<div class="${bgColor} p-3 rounded-md shadow-sm"><p class="font-bold">${req.from}</p><p class="text-sm mb-3">${req.details}</p><div class="flex items-center justify-end space-x-2"><button data-request-index="${index}" class="confirm-request-btn text-xs bg-green-200 text-green-800 px-2 py-1 rounded-md hover:bg-green-300">Potwierdź</button><button data-request-index="${index}" class="propose-new-time-btn text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded-md hover:bg-yellow-300">Zaproponuj inny</button><button data-request-index="${index}" class="reject-request-btn text-xs bg-red-200 text-red-800 px-2 py-1 rounded-md hover:bg-red-300">Odrzuć</button></div></div>`;
+
+    requestsContainer.innerHTML = [...requests].reverse().map((req, reversedIndex) => {
+        const originalIndex = requests.length - 1 - reversedIndex;
+
+        let bgColor = 'bg-blue-100 border-blue-500 text-blue-800'; // За замовчуванням (pending_admin_approval)
+        let buttonsHTML = `
+            <div class="flex items-center justify-end space-x-2">
+                <button data-request-index="${originalIndex}" class="confirm-request-btn text-xs bg-green-200 text-green-800 px-2 py-1 rounded-md hover:bg-green-300">Potwierdź</button>
+                <button data-request-index="${originalIndex}" class="propose-new-time-btn text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded-md hover:bg-yellow-300">Zaproponuj inny</button>
+                <button data-request-index="${originalIndex}" class="reject-request-btn text-xs bg-red-200 text-red-800 px-2 py-1 rounded-md hover:bg-red-300">Odrzuć</button>
+            </div>
+        `;
+
+        switch (req.status) {
+            case 'pending_client_approval':
+                bgColor = 'bg-purple-100 border-purple-500 text-purple-800';
+                break;
+            case 'confirmed':
+                bgColor = 'bg-green-100 border-green-500 text-green-800';
+                buttonsHTML = ''; // Ховаємо кнопки, бо дія виконана
+                break;
+            case 'rejected':
+                bgColor = 'bg-red-100 border-red-500 text-red-800';
+                buttonsHTML = ''; // Ховаємо кнопки, бо дія виконана
+                break;
+        }
+
+        return `
+            <div class="${bgColor} border-l-4 p-3 rounded-md shadow-sm">
+                <p class="font-bold">${req.from}</p>
+                <p class="text-sm mb-3">${req.details}</p>
+                ${buttonsHTML}
+            </div>
+        `;
     }).join('');
 }
 
 export function renderClientDashboard() {
     const client = state.clients.find(c => c.id === state.currentClientId);
     if (!client) return;
+
     const { subscription, history } = client;
     const expirationDate = new Date(subscription.expires);
     const today = new Date();
     const daysLeft = Math.ceil((expirationDate - today) / (1000 * 60 * 60 * 24));
-    const requestsHTML = state.requests.map((req, index) => {
-        if (req.clientId === client.id) {
+
+    const requestsHTML = [...state.requests].reverse().map((req, reversedIndex) => {
+        const originalIndex = state.requests.length - 1 - reversedIndex;
+
+        if (req.clientId === client.id && req.type !== 'Anulowanie wizyty') {
             let bgColor = 'bg-blue-100 border-blue-500 text-blue-700';
             let buttonsHTML = '';
-            if (req.status === 'pending_client_approval') {
-                bgColor = 'bg-purple-100 border-purple-500 text-purple-700';
-                buttonsHTML = `<div class="mt-2 text-right space-x-3"><button data-request-index="${index}" class="reject-proposal-btn font-semibold hover:underline">Odrzuć</button><button data-request-index="${index}" class="accept-proposal-btn font-semibold text-green-600 hover:underline">Akceptuj</button></div>`;
+
+            switch (req.status) {
+                case 'pending_client_approval':
+                    bgColor = 'bg-purple-100 border-purple-500 text-purple-800';
+                    buttonsHTML = `<div class="mt-2 text-right space-x-3"><button data-request-index="${originalIndex}" class="reject-proposal-btn font-semibold hover:underline">Odrzuć</button><button data-request-index="${originalIndex}" class="accept-proposal-btn font-semibold text-green-600 hover:underline">Akceptuj</button></div>`;
+                    break;
+                case 'confirmed':
+                    bgColor = 'bg-green-100 border-green-500 text-green-800';
+                    buttonsHTML = '';
+                    break;
+                case 'rejected':
+                    bgColor = 'bg-red-100 border-red-500 text-red-800';
+                    buttonsHTML = '';
+                    break;
             }
+
             return `<div class="${bgColor} border-l-4 p-3 rounded-md"><p class="text-sm">${req.details}</p>${buttonsHTML}</div>`;
         }
         return '';
     }).join('');
+
     const historyHTML = history.sort((a, b) => new Date(b.date) - new Date(a.date)).map(item => {
         const temperatureInfo = item.temperature ? `<span class="font-bold text-blue-600 w-16 text-center">${item.temperature}</span>` : '<span class="w-16"></span>';
         const durationInfo = item.duration ? `<span class="font-semibold text-gray-700 w-16 text-center">${item.duration}</span>` : '<span class="w-16"></span>';
         const statusClass = item.status === 'Odwiedzono' ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100';
-        return `<li class="flex justify-between items-center p-2 rounded-md hover:bg-gray-50"><div class="flex items-center space-x-3"><svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><span class="font-semibold">${item.date}</span></div><div class="flex items-center space-x-4 text-sm">${durationInfo}${temperatureInfo}<span class="w-24 text-center px-2 py-1 text-xs font-semibold ${statusClass} rounded-full">${item.status}</span></div></li>`;
+        return `
+            <li class="flex justify-between items-center p-2 rounded-md hover:bg-gray-50">
+                <div class="flex items-center space-x-3">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span class="font-semibold">${item.date}</span>
+                </div>
+                <div class="flex items-center space-x-4 text-sm">
+                    ${durationInfo}
+                    ${temperatureInfo}
+                    <span class="w-24 text-center px-2 py-1 text-xs font-semibold ${statusClass} rounded-full">${item.status}</span>
+                </div>
+            </li>
+        `;
     }).join('');
-    document.getElementById('client-info-container').innerHTML = `<div class="bg-white p-6 rounded-xl shadow-lg dashboard-card"><h2 class="text-lg font-semibold mb-4">Mój karnet</h2><div class="text-center py-8"><p class="text-5xl font-bold text-emerald-600">${subscription.entriesLeft}</p><p class="text-gray-500">pozostało wejść</p></div><div class="text-sm text-gray-600"><p><strong>Typ:</strong> ${subscription.type}</p><p><strong>Ważny do:</strong> ${subscription.expires} (${daysLeft} dni)</p></div></div><div class="bg-white p-6 rounded-xl shadow-lg dashboard-card"><h2 class="text-lg font-semibold mb-4">Historia wizyt</h2><ul class="space-y-3 max-h-60 overflow-y-auto pr-2">${historyHTML || '<p>Brak historii.</p>'}</ul></div><div class="bg-white p-6 rounded-xl shadow-lg dashboard-card"><h2 class="text-lg font-semibold mb-4">Status wniosków</h2><div class="space-y-3">${requestsHTML || '<p class="text-sm text-gray-500">Brak aktywnych wniosków.</p>'}</div></div>`;
+
+    document.getElementById('client-info-container').innerHTML = `
+        <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card">
+            <h2 class="text-lg font-semibold mb-4">Mój karnet</h2>
+            <div class="text-center py-8">
+                <p class="text-5xl font-bold text-emerald-600">${subscription.entriesLeft}</p>
+                <p class="text-gray-500">pozostało wejść</p>
+            </div>
+            <div class="text-sm text-gray-600">
+                <p><strong>Typ:</strong> ${subscription.type}</p>
+                <p><strong>Ważny do:</strong> ${subscription.expires} (${daysLeft > 0 ? `${daysLeft} dni` : 'Wygasł'})</p>
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card">
+            <h2 class="text-lg font-semibold mb-4">Historia wizyt</h2>
+            <ul class="space-y-3 max-h-60 overflow-y-auto pr-2">${historyHTML || '<p class="text-sm text-gray-500">Brak historii.</p>'}</ul>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card">
+            <h2 class="text-lg font-semibold mb-4">Status wniosków</h2>
+            <div class="space-y-3 max-h-60 overflow-y-auto pr-2">
+                ${requestsHTML || '<p class="text-sm text-gray-500">Brak aktywnych wniosków.</p>'}
+            </div>
+        </div>
+        `;
+
     renderAppointments();
 }
+
 
 export function renderAppointments() {
     const appointmentsList = document.getElementById('appointments-list');
@@ -83,7 +168,20 @@ export function renderAppointments() {
     appointmentsList.innerHTML = clientAppointments.map(app => {
         const visitDate = new Date(app.date);
         const dayOfWeek = visitDate.toLocaleDateString('pl-PL', { weekday: 'long' });
-        return `<div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"><div class="flex items-center space-x-3"><svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><div><p class="font-semibold">${app.date} (${dayOfWeek})</p><p class="text-sm text-gray-600">Godzina: ${app.time}</p></div></div><button class="text-xs text-red-500 hover:underline">Anuluj</button></div>`;
+        return `
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center space-x-3">
+                    <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <div>
+                        <p class="font-semibold">${app.date} (${dayOfWeek})</p>
+                        <p class="text-sm text-gray-600">Godzina: ${app.time}</p>
+                    </div>
+                </div>
+                <button data-appointment-id="${app.id}" class="change-appointment-btn text-xs text-indigo-600 hover:underline">
+                    Zmień termin
+                </button>
+            </div>
+        `;
     }).join('');
 }
 
@@ -132,9 +230,22 @@ export function renderCalendar() {
     let startingDayOfWeek = firstDay.getDay() - 1;
     if (startingDayOfWeek === -1) startingDayOfWeek = 6;
     const availableWeekdays = Object.keys(state.schedule).map(Number);
-    let html = `<div class="calendar-header"><button class="calendar-nav-btn" onclick="changeMonth(-1)"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button><h3 class="text-lg font-semibold">${monthNames[month]} ${year}</h3><button class="calendar-nav-btn" onclick="changeMonth(1)"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button></div><div class="calendar-grid">`;
+
+    let html = `
+        <div class="calendar-header">
+            <button class="calendar-nav-btn" data-action="change-month" data-direction="-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <h3 class="text-lg font-semibold">${monthNames[month]} ${year}</h3>
+            <button class="calendar-nav-btn" data-action="change-month" data-direction="1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+        </div>
+        <div class="calendar-grid">
+    `;
     dayNames.forEach(day => { html += `<div class="calendar-day-header">${day}</div>`; });
     for (let i = 0; i < startingDayOfWeek; i++) { html += `<div class="calendar-day disabled"></div>`; }
+
     for (let day = 1; day <= daysInMonth; day++) {
         const currentDateObj = new Date(year, month, day);
         const dayOfWeek = currentDateObj.getDay();
@@ -142,13 +253,17 @@ export function renderCalendar() {
         const isPast = currentDateObj < today;
         const isAvailable = availableWeekdays.includes(dayOfWeek) && !isPast;
         const isSelected = selectedDate && currentDateObj.toDateString() === selectedDate.toDateString();
+
         let classes = 'calendar-day';
         if (isToday) classes += ' today';
         if (isSelected) classes += ' selected';
         if (isAvailable) classes += ' available';
         if (!isAvailable) classes += ' disabled';
-        html += `<div class="${classes}" ${isAvailable ? `onclick="selectDate(${year}, ${month}, ${day})"` : ''}>${day}</div>`;
+
+        const dataAttributes = isAvailable ? `data-action="select-date" data-year="${year}" data-month="${month}" data-day="${day}"` : '';
+        html += `<div class="${classes}" ${dataAttributes}>${day}</div>`;
     }
+
     html += `</div>`;
     document.getElementById('booking-calendar').innerHTML = html;
 }
@@ -175,9 +290,23 @@ export function renderAdminCalendar() {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     let startingDayOfWeek = firstDay.getDay() - 1;
     if (startingDayOfWeek === -1) startingDayOfWeek = 6;
-    let html = `<div class="calendar-header"><button class="calendar-nav-btn" onclick="changeMonth(-1, true)"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button><h3 class="text-lg font-semibold">${monthNames[month]} ${year}</h3><button class="calendar-nav-btn" onclick="changeMonth(1, true)"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button></div><div class="calendar-grid admin-calendar-grid">`;
+
+    let html = `
+        <div class="calendar-header">
+            <button class="calendar-nav-btn" data-action="change-month" data-direction="-1" data-is-admin="true">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <h3 class="text-lg font-semibold">${monthNames[month]} ${year}</h3>
+            <button class="calendar-nav-btn" data-action="change-month" data-direction="1" data-is-admin="true">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+        </div>
+        <div class="calendar-grid admin-calendar-grid">
+    `;
+
     dayNames.forEach(day => { html += `<div class="calendar-day-header">${day}</div>`; });
     for (let i = 0; i < startingDayOfWeek; i++) { html += `<div></div>`; }
+
     for (let day = 1; day <= daysInMonth; day++) {
         const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         const appointmentsForDay = appointmentsByDate[dateString] || [];
@@ -187,10 +316,10 @@ export function renderAdminCalendar() {
             dayAppointmentsHTML = appointmentsForDay.slice(0, APPOINTMENT_LIMIT).map(app => `<div class="admin-calendar-appointment">${app.time} - ${app.clientName}</div>`).join('');
             if (appointmentsForDay.length > APPOINTMENT_LIMIT) {
                 const remaining = appointmentsForDay.length - APPOINTMENT_LIMIT;
-                dayAppointmentsHTML += `<div class="admin-calendar-more-link" onclick="showDayDetails('${dateString}')">+ ${remaining} więcej...</div>`;
+                dayAppointmentsHTML += `<div class="admin-calendar-more-link" data-action="show-day-details" data-date="${dateString}">+ ${remaining} więcej...</div>`;
             }
         }
-        html += `<div class="admin-calendar-day" onclick="showDayDetails('${dateString}')"><div class="day-number">${day}</div>${dayAppointmentsHTML}</div>`;
+        html += `<div class="admin-calendar-day" data-action="show-day-details" data-date="${dateString}"><div class="day-number">${day}</div>${dayAppointmentsHTML}</div>`;
     }
     html += `</div>`;
     container.innerHTML = html;
