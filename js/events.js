@@ -6,15 +6,15 @@ import * as render from './render.js';
 function login(role) {
     document.getElementById('loginScreen').classList.add('hidden');
     if (role === 'admin') {
+        document.getElementById('adminDashboard').classList.remove('hidden');
         render.renderStatistics();
         render.renderClientsList();
         render.renderRequests();
         render.renderAdminCalendar();
-        document.getElementById('adminDashboard').classList.remove('hidden');
     } else {
+        document.getElementById('clientDashboard').classList.remove('hidden');
         render.renderClientDashboard();
         initializeCalendar();
-        document.getElementById('clientDashboard').classList.remove('hidden');
     }
 }
 
@@ -72,7 +72,7 @@ function initializeCalendar() {
     render.renderCalendar();
 }
 
-export function changeMonth(direction, isAdminCalendar = false) {
+function changeMonth(direction, isAdminCalendar = false) {
     state.calendar.currentDate.setMonth(state.calendar.currentDate.getMonth() + direction);
     if (isAdminCalendar) {
         render.renderAdminCalendar();
@@ -81,13 +81,13 @@ export function changeMonth(direction, isAdminCalendar = false) {
     }
 }
 
-export function selectDate(year, month, day) {
+function selectDate(year, month, day) {
     state.calendar.selectedDate = new Date(year, month, day);
     render.renderCalendar();
     render.renderTimeSlots(state.calendar.selectedDate);
 }
 
-export function showDayDetails(dateString) {
+function showDayDetails(dateString) {
     const modalTitle = document.getElementById('dayDetailsModalTitle');
     const modalBody = document.getElementById('dayDetailsModalBody');
     const visitDate = new Date(dateString);
@@ -132,7 +132,7 @@ export function showDayDetails(dateString) {
     openDayDetailsModal();
 }
 
-export function openCreateAppointmentFromDetails(dateString) {
+function openCreateAppointmentFromDetails(dateString) {
     closeDayDetailsModal();
     openCreateAppointmentModal(dateString);
 }
@@ -182,8 +182,7 @@ function closeDayDetailsModal() {
     document.getElementById('dayDetailsModal').classList.add('hidden');
 }
 
-
-// === EVENT LISTENERS (Розділені на логічні блоки) ===
+// === EVENT LISTENERS ===
 
 function setupLoginListeners() {
     document.getElementById('loginAdminBtn').addEventListener('click', () => login('admin'));
@@ -196,40 +195,33 @@ function setupAdminDashboardListeners() {
     const adminDashboard = document.getElementById('adminDashboard');
     if (!adminDashboard) return;
 
-    document.getElementById('addClientBtn').addEventListener('click', openAddClientModal);
-    document.getElementById('searchInput').addEventListener('input', (event) => {
-        state.filters.searchQuery = event.target.value;
-        render.renderClientsList();
-    });
-    document.getElementById('filterSelect').addEventListener('change', (event) => {
-        state.filters.filterBy = event.target.value;
-        render.renderClientsList();
-    });
-    document.getElementById('clients-list-container').addEventListener('click', (event) => {
-        if (event.target.classList.contains('manage-btn')) {
-            const clientId = parseInt(event.target.dataset.clientId, 10);
+    adminDashboard.addEventListener('click', (event) => {
+        const target = event.target;
+
+        if (target.id === 'addClientBtn') {
+            openAddClientModal();
+        }
+
+        if (target.classList.contains('manage-btn')) {
+            const clientId = parseInt(target.dataset.clientId, 10);
             openManageClientModal(clientId);
         }
-    });
 
-    const requestsContainer = document.getElementById('requests-container');
-    if (requestsContainer) {
-        requestsContainer.addEventListener('click', (event) => {
-            const requestIndex = parseInt(event.target.dataset.requestIndex, 10);
-            if (isNaN(requestIndex)) return;
+        const requestIndex = parseInt(target.dataset.requestIndex, 10);
+        if (!isNaN(requestIndex)) {
             const request = state.requests[requestIndex];
             if (!request) return;
 
-            if (event.target.classList.contains('reject-request-btn')) {
+            if (target.classList.contains('reject-request-btn')) {
                 request.status = 'rejected';
                 request.details = `Prośba (${request.details}) została odrzucona.`;
                 render.renderRequests();
                 alert(`Wniosek od "${request.from}" został odrzucony.`);
             }
-            if (event.target.classList.contains('propose-new-time-btn')) {
+            if (target.classList.contains('propose-new-time-btn')) {
                 openProposeTimeModal({ requestIndex });
             }
-            if (event.target.classList.contains('confirm-request-btn')) {
+            if (target.classList.contains('confirm-request-btn')) {
                 const dateMatch = request.details.match(/\d{4}-\d{2}-\d{2}/g);
                 const timeMatch = request.details.match(/\d{2}:\d{2}/g);
                 if (!dateMatch || !timeMatch) {
@@ -247,30 +239,38 @@ function setupAdminDashboardListeners() {
                 }
                 const newAppointment = { id: state.appointments.length > 0 ? Math.max(...state.appointments.map(a => a.id)) + 1 : 1, date: date, time: time, clientId: client.id };
                 state.appointments.push(newAppointment);
-
                 request.status = 'confirmed';
                 request.details = `Wizyta na <strong>${date} o ${time}</strong> została pomyślnie potwierdzona!`;
-
                 render.renderRequests();
                 render.renderAdminCalendar();
                 render.renderClientsList();
                 alert(`Wizyta dla "${request.from}" na ${date} o ${time} została pomyślnie potwierdzona!`);
             }
-        });
-    }
+        }
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (event) => {
+        state.filters.searchQuery = event.target.value;
+        render.renderClientsList();
+    });
+    document.getElementById('filterSelect').addEventListener('change', (event) => {
+        state.filters.filterBy = event.target.value;
+        render.renderClientsList();
+    });
 }
 
 function setupClientDashboardListeners() {
     const clientDashboard = document.getElementById('clientDashboard');
     if (!clientDashboard) return;
 
-    document.getElementById('requestSpecialTermBtn').addEventListener('click', () => {
-        state.appointmentToChangeId = null;
-        openSpecialTermModal();
-    });
-
-    document.getElementById('time-slots-container').addEventListener('click', (event) => {
+    clientDashboard.addEventListener('click', (event) => {
         const target = event.target;
+
+        if (target.id === 'requestSpecialTermBtn') {
+            state.appointmentToChangeId = null;
+            openSpecialTermModal();
+        }
+
         if (target.classList.contains('time-slot') && !target.disabled) {
             if (!state.calendar.selectedDate) {
                 alert('Proszę najpierw wybrać datę w kalendarzu.');
@@ -288,10 +288,7 @@ function setupClientDashboardListeners() {
             render.renderClientDashboard();
             alert(`Twoja prośba o rezerwację na ${selectedDate} o ${selectedTime} została wysłana!`);
         }
-    });
 
-    document.getElementById('clientDashboard').addEventListener('click', (event) => {
-        const target = event.target;
         const isAcceptBtn = target.classList.contains('accept-proposal-btn');
         const isRejectBtn = target.classList.contains('reject-proposal-btn');
         if (isAcceptBtn || isRejectBtn) {
@@ -320,11 +317,9 @@ function setupClientDashboardListeners() {
                 }
             }
         }
-    });
 
-    document.getElementById('appointments-list').addEventListener('click', (event) => {
-        if (event.target.classList.contains('change-appointment-btn')) {
-            const appointmentId = parseInt(event.target.dataset.appointmentId, 10);
+        if (target.classList.contains('change-appointment-btn')) {
+            const appointmentId = parseInt(target.dataset.appointmentId, 10);
             const appointment = state.appointments.find(a => a.id === appointmentId);
             if (!appointment) return;
             const appointmentDateTime = new Date(`${appointment.date}T${appointment.time}`);
@@ -334,9 +329,7 @@ function setupClientDashboardListeners() {
             if (hoursDifference < 24) {
                 confirmationMessage = 'UWAGA: Do wizyty pozostało mniej niż 24 godziny. Z Twojego karnetu zostanie odjęte 1 wejście. Czy na pewno chcesz kontynuować?';
             }
-            if (!confirm(confirmationMessage)) {
-                return;
-            }
+            if (!confirm(confirmationMessage)) return;
             const client = state.clients.find(c => c.id === state.currentClientId);
             if (hoursDifference < 24) {
                 client.subscription.entriesLeft -= 1;
@@ -379,13 +372,11 @@ function setupModalListeners() {
                 alert('Proszę wybrać datę wizyty.');
                 return;
             }
-            let tempValue = null;
-            if (statusInput.value === 'Odwiedzono' && tempInput.value) {
-                tempValue = `${tempInput.value}°C`;
-            }
-            let durationValue = null;
-            if (statusInput.value === 'Odwiedzono' && durationInput.value) {
-                durationValue = `${durationInput.value} sec`;
+            let tempValue = tempInput.value ? `${tempInput.value}°C` : null;
+            let durationValue = durationInput.value ? `${durationInput.value} sec` : null;
+            if (statusInput.value !== 'Odwiedzono') {
+                tempValue = null;
+                durationValue = null;
             }
             client.history.push({ date: dateInput.value, duration: durationValue, status: statusInput.value, temperature: tempValue });
             if (statusInput.value === 'Odwiedzono') {
@@ -495,42 +486,34 @@ function setupModalListeners() {
         alert('Propozycja zmiany terminu została wysłana do klienta!');
     });
     document.getElementById('closeDayDetailsModalBtn').addEventListener('click', closeDayDetailsModal);
-    document.getElementById('closeDayDetailsModalBtn').addEventListener('click', closeDayDetailsModal);
-
-    // ЗМІНИ ВНОСЯТЬСЯ ТІЛЬКИ В ЦЕЙ СЛУХАЧ
     document.getElementById('dayDetailsModalBody').addEventListener('click', (event) => {
         const target = event.target;
-        const appointmentId = parseInt(target.dataset.appointmentId, 10);
 
-        // ---- ПОЧАТОК НОВОГО БЛОКУ ----
         if (target.dataset.action === 'open-create-appointment-from-details') {
             openCreateAppointmentFromDetails(target.dataset.date);
-            return; // Виходимо, щоб не обробляти інші кліки
+            return;
         }
-        // ---- КІНЕЦЬ НОВОГО БЛОКУ ----
 
+        const appointmentId = parseInt(target.dataset.appointmentId, 10);
         if (!appointmentId) return;
 
         if (target.classList.contains('manage-appointment-btn')) {
-            const appointment = state.appointments.find(a => a.id === appointmentId);
-            if (appointment) {
-                closeDayDetailsModal();
-                openProposeTimeModal({ appointmentId: appointmentId });
-            }
+            openProposeTimeModal({ appointmentId });
         }
         if (target.classList.contains('delete-appointment-btn')) {
             if (confirm('Czy na pewno chcesz usunąć tę wizytę? Klient nie zostanie obciążony karą.')) {
                 const appointmentIndex = state.appointments.findIndex(a => a.id === appointmentId);
                 if (appointmentIndex > -1) {
+                    const deletedAppointment = state.appointments[appointmentIndex];
                     state.appointments.splice(appointmentIndex, 1);
                     closeDayDetailsModal();
                     render.renderAdminCalendar();
+                    showDayDetails(deletedAppointment.date);
                     alert('Wizyta została usunięta.');
                 }
             }
         }
     });
-
     document.getElementById('cancelCreateAppointmentBtn').addEventListener('click', closeCreateAppointmentModal);
     document.getElementById('createAppointmentForm').addEventListener('submit', (event) => {
         event.preventDefault();
@@ -554,50 +537,31 @@ function setupModalListeners() {
 }
 
 function setupCalendarListeners() {
-    // Слухач для клієнтського календаря
-    const bookingCalendar = document.getElementById('booking-calendar');
-    if (bookingCalendar) {
-        bookingCalendar.addEventListener('click', (event) => {
-            const target = event.target.closest('[data-action]');
-            if (!target) return;
-
-            const action = target.dataset.action;
-
-            if (action === 'change-month') {
-                const direction = parseInt(target.dataset.direction, 10);
-                changeMonth(direction);
-            }
-
-            if (action === 'select-date') {
-                const { year, month, day } = target.dataset;
-                selectDate(parseInt(year, 10), parseInt(month, 10), parseInt(day, 10));
-            }
-        });
-    }
-
-    // Слухач для календаря адміністратора
-    const adminCalendar = document.getElementById('admin-calendar-container');
-    if (adminCalendar) {
-        adminCalendar.addEventListener('click', (event) => {
-            const target = event.target.closest('[data-action]');
-            if (!target) return;
-
-            const action = target.dataset.action;
-
-            if (action === 'change-month') {
+    const calendarContainer = document.querySelector('body'); // Listen on the whole body
+    calendarContainer.addEventListener('click', (event) => {
+        const target = event.target.closest('[data-action]');
+        if (!target) return;
+        const action = target.dataset.action;
+        switch (action) {
+            case 'change-month':
                 const direction = parseInt(target.dataset.direction, 10);
                 const isAdmin = target.dataset.isAdmin === 'true';
                 changeMonth(direction, isAdmin);
-            }
-
-            if (action === 'show-day-details') {
+                break;
+            case 'select-date':
+                const { year, month, day } = target.dataset;
+                selectDate(parseInt(year, 10), parseInt(month, 10), parseInt(day, 10));
+                break;
+            case 'show-day-details':
                 showDayDetails(target.dataset.date);
-            }
-        });
-    }
+                break;
+            case 'open-create-appointment-from-details':
+                openCreateAppointmentFromDetails(target.dataset.date);
+                break;
+        }
+    });
 }
 
-// === ГОЛОВНА ФУНКЦІЯ ІНІЦІАЛІЗАЦІЇ ===
 export function setupEventListeners() {
     setupLoginListeners();
     setupAdminDashboardListeners();

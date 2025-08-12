@@ -150,21 +150,20 @@ body {
     cursor: not-allowed;
 }
 
-/* Нові стилі для календаря адміністратора */
 .admin-calendar-grid {
-    grid-auto-rows: minmax(120px, auto); /* Робимо клітинки вищими */
+    grid-auto-rows: minmax(120px, auto);
 }
 
 .admin-calendar-day {
     border: 1px solid #e5e7eb;
     padding: 4px;
     font-size: 12px;
-    cursor: pointer; /* <-- Додай цей рядок */
-    transition: background-color 0.2s; /* Додамо плавний ефект */
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
 
 .admin-calendar-day:hover {
-    background-color: #f9fafb; /* Дуже світло-сірий */
+    background-color: #f9fafb;
 }
 
 .admin-calendar-day .day-number {
@@ -175,8 +174,8 @@ body {
 }
 
 .admin-calendar-appointment {
-    background-color: #dbeafe; /* Синій фон */
-    color: #1e40af; /* Темно-синій текст */
+    background-color: #dbeafe;
+    color: #1e40af;
     padding: 2px 4px;
     border-radius: 4px;
     margin-bottom: 2px;
@@ -188,7 +187,7 @@ body {
 .admin-calendar-more-link {
     font-size: 11px;
     text-align: center;
-    color: #4f46e5; /* indigo-600 */
+    color: #4f46e5;
     cursor: pointer;
     font-weight: 600;
     margin-top: 4px;
@@ -198,46 +197,43 @@ body {
     text-decoration: underline;
 }
 
-/* --- Нові стилі для вкладок в модальному вікні --- */
-
-/* Контейнер для кнопок-вкладок */
 .tab-container {
     display: flex;
-    border-bottom: 2px solid #e5e7eb; /* Світло-сіра лінія під вкладками */
-    margin-bottom: 1.5rem; /* Відступ від контенту */
+    border-bottom: 2px solid #e5e7eb;
+    margin-bottom: 1.5rem;
 }
 
-/* Стиль для кожної кнопки-вкладки */
 .tab-button {
     padding: 0.75rem 1.25rem;
     cursor: pointer;
     background-color: transparent;
     border: none;
-    color: #6b7280; /* Сірий колір для неактивної вкладки */
+    color: #6b7280;
     font-weight: 500;
-    font-size: 0.875rem; /* 14px */
-    border-bottom: 2px solid transparent; /* Прозора лінія для ефекту */
-    margin-bottom: -2px; /* Накладаємо на основну лінію */
+    font-size: 0.875rem;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
     transition: all 0.2s;
 }
 
-/* Стиль для кнопки при наведенні */
 .tab-button:hover {
-    color: #111827; /* Темно-сірий колір */
+    color: #111827;
 }
 
-/* Стиль для АКТИВНОЇ кнопки-вкладки */
 .tab-button.active {
-    color: #4f46e5; /* Наш фірмовий індиго */
-    border-bottom-color: #4f46e5; /* Кольорова лінія під активною вкладкою */
+    color: #4f46e5;
+    border-bottom-color: #4f46e5;
 }
 
-/* Контейнер для вмісту вкладок */
 .tab-content {
-    display: none; /* За замовчуванням весь вміст прихований */
+    display: none;
 }
 
-/* Клас, який робить вміст вкладки видимим */
 .tab-content.active {
     display: block;
+}
+
+/* Єдиний правильний клас для скролінгу */
+.fill-and-scroll {
+    overflow-y: auto;
 }

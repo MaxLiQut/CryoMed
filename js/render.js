@@ -20,6 +20,7 @@ export function renderClientsList() {
         return true;
     });
     const container = document.getElementById('clients-list-container');
+    if (!container) return;
     if (filteredClients.length === 0) {
         container.innerHTML = `<p class="text-sm text-gray-500">Nie znaleziono klientów spełniających kryteria.</p>`;
         return;
@@ -39,37 +40,24 @@ export function renderRequests() {
 
     requestsContainer.innerHTML = [...requests].reverse().map((req, reversedIndex) => {
         const originalIndex = requests.length - 1 - reversedIndex;
-
-        let bgColor = 'bg-blue-100 border-blue-500 text-blue-800'; // За замовчуванням (pending_admin_approval)
-        let buttonsHTML = `
-            <div class="flex items-center justify-end space-x-2">
-                <button data-request-index="${originalIndex}" class="confirm-request-btn text-xs bg-green-200 text-green-800 px-2 py-1 rounded-md hover:bg-green-300">Potwierdź</button>
-                <button data-request-index="${originalIndex}" class="propose-new-time-btn text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded-md hover:bg-yellow-300">Zaproponuj inny</button>
-                <button data-request-index="${originalIndex}" class="reject-request-btn text-xs bg-red-200 text-red-800 px-2 py-1 rounded-md hover:bg-red-300">Odrzuć</button>
-            </div>
-        `;
-
-        switch (req.status) {
-            case 'pending_client_approval':
-                bgColor = 'bg-purple-100 border-purple-500 text-purple-800';
-                break;
-            case 'confirmed':
-                bgColor = 'bg-green-100 border-green-500 text-green-800';
-                buttonsHTML = ''; // Ховаємо кнопки, бо дія виконана
-                break;
-            case 'rejected':
-                bgColor = 'bg-red-100 border-red-500 text-red-800';
-                buttonsHTML = ''; // Ховаємо кнопки, бо дія виконана
-                break;
+        if (req.status === 'pending_admin_approval') {
+            let bgColor = 'bg-blue-100 border-blue-500 text-blue-800';
+            let buttonsHTML = `
+                <div class="flex items-center justify-end space-x-2">
+                    <button data-request-index="${originalIndex}" class="confirm-request-btn text-xs bg-green-200 text-green-800 px-2 py-1 rounded-md hover:bg-green-300">Potwierdź</button>
+                    <button data-request-index="${originalIndex}" class="propose-new-time-btn text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded-md hover:bg-yellow-300">Zaproponuj inny</button>
+                    <button data-request-index="${originalIndex}" class="reject-request-btn text-xs bg-red-200 text-red-800 px-2 py-1 rounded-md hover:bg-red-300">Odrzuć</button>
+                </div>
+            `;
+            return `
+                <div class="${bgColor} border-l-4 p-3 rounded-md shadow-sm">
+                    <p class="font-bold">${req.from}</p>
+                    <p class="text-sm mb-3">${req.details}</p>
+                    ${buttonsHTML}
+                </div>
+            `;
         }
-
-        return `
-            <div class="${bgColor} border-l-4 p-3 rounded-md shadow-sm">
-                <p class="font-bold">${req.from}</p>
-                <p class="text-sm mb-3">${req.details}</p>
-                ${buttonsHTML}
-            </div>
-        `;
+        return '';
     }).join('');
 }
 
@@ -85,25 +73,25 @@ export function renderClientDashboard() {
     const requestsHTML = [...state.requests].reverse().map((req, reversedIndex) => {
         const originalIndex = state.requests.length - 1 - reversedIndex;
 
-        if (req.clientId === client.id && req.type !== 'Anulowanie wizyty') {
+        if (req.clientId === client.id) {
             let bgColor = 'bg-blue-100 border-blue-500 text-blue-700';
             let buttonsHTML = '';
 
             switch (req.status) {
+                case 'pending_admin_approval':
+                    // Для клієнта не показуємо кнопок, він просто чекає
+                    break;
                 case 'pending_client_approval':
                     bgColor = 'bg-purple-100 border-purple-500 text-purple-800';
                     buttonsHTML = `<div class="mt-2 text-right space-x-3"><button data-request-index="${originalIndex}" class="reject-proposal-btn font-semibold hover:underline">Odrzuć</button><button data-request-index="${originalIndex}" class="accept-proposal-btn font-semibold text-green-600 hover:underline">Akceptuj</button></div>`;
                     break;
                 case 'confirmed':
                     bgColor = 'bg-green-100 border-green-500 text-green-800';
-                    buttonsHTML = '';
                     break;
                 case 'rejected':
                     bgColor = 'bg-red-100 border-red-500 text-red-800';
-                    buttonsHTML = '';
                     break;
             }
-
             return `<div class="${bgColor} border-l-4 p-3 rounded-md"><p class="text-sm">${req.details}</p>${buttonsHTML}</div>`;
         }
         return '';
@@ -129,33 +117,35 @@ export function renderClientDashboard() {
     }).join('');
 
     document.getElementById('client-info-container').innerHTML = `
-        <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card">
-            <h2 class="text-lg font-semibold mb-4">Mój karnet</h2>
-            <div class="text-center py-8">
-                <p class="text-5xl font-bold text-emerald-600">${subscription.entriesLeft}</p>
-                <p class="text-gray-500">pozostało wejść</p>
-            </div>
-            <div class="text-sm text-gray-600">
-                <p><strong>Typ:</strong> ${subscription.type}</p>
-                <p><strong>Ważny do:</strong> ${subscription.expires} (${daysLeft > 0 ? `${daysLeft} dni` : 'Wygasł'})</p>
-            </div>
+    <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card">
+        <h2 class="text-lg font-semibold mb-4">Mój karnet</h2>
+        <div class="text-center py-8">
+            <p class="text-5xl font-bold text-emerald-600">${subscription.entriesLeft}</p>
+            <p class="text-gray-500">pozostało wejść</p>
         </div>
-        <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card">
-            <h2 class="text-lg font-semibold mb-4">Historia wizyt</h2>
-            <ul class="space-y-3 max-h-60 overflow-y-auto pr-2">${historyHTML || '<p class="text-sm text-gray-500">Brak historii.</p>'}</ul>
+        <div class="text-sm text-gray-600">
+            <p><strong>Typ:</strong> ${subscription.type}</p>
+            <p><strong>Ważny do:</strong> ${subscription.expires} (${daysLeft > 0 ? `${daysLeft} dni` : 'Wygasł'})</p>
         </div>
+    </div>
 
-        <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card">
-            <h2 class="text-lg font-semibold mb-4">Status wniosków</h2>
-            <div class="space-y-3 max-h-60 overflow-y-auto pr-2">
-                ${requestsHTML || '<p class="text-sm text-gray-500">Brak aktywnych wniosków.</p>'}
-            </div>
+    <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card flex flex-col h-full">
+        <h2 class="text-lg font-semibold mb-4">Historia wizyt</h2>
+        <ul class="space-y-3 fill-and-scroll flex-grow min-h-0 pr-2">
+            ${historyHTML || '<p class="text-sm text-gray-500">Brak historii.</p>'}
+        </ul>
+    </div>
+
+    <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card flex flex-col h-full">
+        <h2 class="text-lg font-semibold mb-4">Status wniosków</h2>
+        <div class="space-y-3 fill-and-scroll flex-grow min-h-0 pr-2">
+            ${requestsHTML || '<p class="text-sm text-gray-500">Brak aktywnych wniosków.</p>'}
         </div>
-        `;
+    </div>
+`;
 
     renderAppointments();
 }
-
 
 export function renderAppointments() {
     const appointmentsList = document.getElementById('appointments-list');
