@@ -233,7 +233,18 @@ body {
     display: block;
 }
 
-/* Єдиний правильний клас для скролінгу */
-.fill-and-scroll {
+/* === НОВІ, СПРОЩЕНІ КЛАСИ ДЛЯ СКРОЛУ === */
+
+/* Високий список для панелі адміністратора */
+.scroll-list-admin {
+    max-height: 500px; /* Можна налаштувати */
     overflow-y: auto;
+    padding-right: 8px;
+}
+
+/* Короткий список для панелі клієнта */
+.scroll-list-client {
+    max-height: 240px; /* Можна налаштувати */
+    overflow-y: auto;
+    padding-right: 8px;
 }

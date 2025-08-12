@@ -33,31 +33,30 @@ export function renderRequests() {
     const requestsContainer = document.getElementById('requests-container');
     if (!requestsContainer) return;
 
-    if (requests.length === 0) {
+    const pendingRequests = requests.filter(req => req.status === 'pending_admin_approval');
+
+    if (pendingRequests.length === 0) {
         requestsContainer.innerHTML = `<p class="text-sm text-gray-500">Brak nowych wniosków.</p>`;
         return;
     }
 
-    requestsContainer.innerHTML = [...requests].reverse().map((req, reversedIndex) => {
-        const originalIndex = requests.length - 1 - reversedIndex;
-        if (req.status === 'pending_admin_approval') {
-            let bgColor = 'bg-blue-100 border-blue-500 text-blue-800';
-            let buttonsHTML = `
-                <div class="flex items-center justify-end space-x-2">
-                    <button data-request-index="${originalIndex}" class="confirm-request-btn text-xs bg-green-200 text-green-800 px-2 py-1 rounded-md hover:bg-green-300">Potwierdź</button>
-                    <button data-request-index="${originalIndex}" class="propose-new-time-btn text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded-md hover:bg-yellow-300">Zaproponuj inny</button>
-                    <button data-request-index="${originalIndex}" class="reject-request-btn text-xs bg-red-200 text-red-800 px-2 py-1 rounded-md hover:bg-red-300">Odrzuć</button>
-                </div>
-            `;
-            return `
-                <div class="${bgColor} border-l-4 p-3 rounded-md shadow-sm">
-                    <p class="font-bold">${req.from}</p>
-                    <p class="text-sm mb-3">${req.details}</p>
-                    ${buttonsHTML}
-                </div>
-            `;
-        }
-        return '';
+    requestsContainer.innerHTML = [...pendingRequests].reverse().map(req => {
+        const originalIndex = requests.findIndex(r => r === req);
+        let bgColor = 'bg-blue-100 border-blue-500 text-blue-800';
+        let buttonsHTML = `
+            <div class="flex items-center justify-end space-x-2">
+                <button data-request-index="${originalIndex}" class="confirm-request-btn text-xs bg-green-200 text-green-800 px-2 py-1 rounded-md hover:bg-green-300">Potwierdź</button>
+                <button data-request-index="${originalIndex}" class="propose-new-time-btn text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded-md hover:bg-yellow-300">Zaproponuj inny</button>
+                <button data-request-index="${originalIndex}" class="reject-request-btn text-xs bg-red-200 text-red-800 px-2 py-1 rounded-md hover:bg-red-300">Odrzuć</button>
+            </div>
+        `;
+        return `
+            <div class="${bgColor} border-l-4 p-3 rounded-md shadow-sm">
+                <p class="font-bold">${req.from}</p>
+                <p class="text-sm mb-3">${req.details}</p>
+                ${buttonsHTML}
+            </div>
+        `;
     }).join('');
 }
 
@@ -79,7 +78,6 @@ export function renderClientDashboard() {
 
             switch (req.status) {
                 case 'pending_admin_approval':
-                    // Для клієнта не показуємо кнопок, він просто чекає
                     break;
                 case 'pending_client_approval':
                     bgColor = 'bg-purple-100 border-purple-500 text-purple-800';
@@ -104,7 +102,7 @@ export function renderClientDashboard() {
         return `
             <li class="flex justify-between items-center p-2 rounded-md hover:bg-gray-50">
                 <div class="flex items-center space-x-3">
-                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 002-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     <span class="font-semibold">${item.date}</span>
                 </div>
                 <div class="flex items-center space-x-4 text-sm">
@@ -117,32 +115,32 @@ export function renderClientDashboard() {
     }).join('');
 
     document.getElementById('client-info-container').innerHTML = `
-    <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card">
-        <h2 class="text-lg font-semibold mb-4">Mój karnet</h2>
-        <div class="text-center py-8">
-            <p class="text-5xl font-bold text-emerald-600">${subscription.entriesLeft}</p>
-            <p class="text-gray-500">pozostało wejść</p>
+        <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card">
+            <h2 class="text-lg font-semibold mb-4">Mój karnet</h2>
+            <div class="text-center py-8">
+                <p class="text-5xl font-bold text-emerald-600">${subscription.entriesLeft}</p>
+                <p class="text-gray-500">pozostało wejść</p>
+            </div>
+            <div class="text-sm text-gray-600">
+                <p><strong>Typ:</strong> ${subscription.type}</p>
+                <p><strong>Ważny do:</strong> ${subscription.expires} (${daysLeft > 0 ? `${daysLeft} dni` : 'Wygasł'})</p>
+            </div>
         </div>
-        <div class="text-sm text-gray-600">
-            <p><strong>Typ:</strong> ${subscription.type}</p>
-            <p><strong>Ważny do:</strong> ${subscription.expires} (${daysLeft > 0 ? `${daysLeft} dni` : 'Wygasł'})</p>
-        </div>
-    </div>
 
-    <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card flex flex-col h-full">
-        <h2 class="text-lg font-semibold mb-4">Historia wizyt</h2>
-        <ul class="space-y-3 fill-and-scroll flex-grow min-h-0 pr-2">
-            ${historyHTML || '<p class="text-sm text-gray-500">Brak historii.</p>'}
-        </ul>
-    </div>
-
-    <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card flex flex-col h-full">
-        <h2 class="text-lg font-semibold mb-4">Status wniosków</h2>
-        <div class="space-y-3 fill-and-scroll flex-grow min-h-0 pr-2">
-            ${requestsHTML || '<p class="text-sm text-gray-500">Brak aktywnych wniosków.</p>'}
+        <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card">
+            <h2 class="text-lg font-semibold mb-4">Historia wizyt</h2>
+            <ul class="space-y-3 scroll-list-client">
+                ${historyHTML || '<p class="text-sm text-gray-500">Brak historii.</p>'}
+            </ul>
         </div>
-    </div>
-`;
+
+        <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card">
+            <h2 class="text-lg font-semibold mb-4">Status wniosków</h2>
+            <div class="space-y-3 scroll-list-client">
+                ${requestsHTML || '<p class="text-sm text-gray-500">Brak aktywnych wniosków.</p>'}
+            </div>
+        </div>
+    `;
 
     renderAppointments();
 }
@@ -161,7 +159,7 @@ export function renderAppointments() {
         return `
             <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div class="flex items-center space-x-3">
-                    <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 002-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     <div>
                         <p class="font-semibold">${app.date} (${dayOfWeek})</p>
                         <p class="text-sm text-gray-600">Godzina: ${app.time}</p>
