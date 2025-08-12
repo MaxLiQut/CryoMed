@@ -108,33 +108,46 @@ export function renderClientDashboard() {
     }).join('');
 
     document.getElementById('client-info-container').innerHTML = `
-    <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card">
-        <h2 class="text-lg font-semibold mb-4">Mój karnet</h2>
-        <div class="text-center py-8">
-            <p class="text-5xl font-bold text-emerald-600">${subscription.entriesLeft}</p>
-            <p class="text-gray-500">pozostało wejść</p>
-        </div>
-        <div class="text-sm text-gray-600">
-            <p><strong>Typ:</strong> ${subscription.type}</p>
-            <p><strong>Ważny do:</strong> ${subscription.expires} (${daysLeft > 0 ? `${daysLeft} dni` : 'Wygasł'})</p>
-        </div>
-    </div>
-
-    <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card equal-height-card">
-        <h2 class="text-lg font-semibold mb-4">Historia wizyt</h2>
-        <div class="card-scroll-content">
-            <ul class="space-y-3">
-                ${historyHTML || '<p class="text-sm text-gray-500">Brak historii.</p>'}
-            </ul>
-        </div>
-    </div>
-
-    <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card equal-height-card">
-        <h2 class="text-lg font-semibold mb-4">Status wniosków</h2>
-        <div class="card-scroll-content">
-            <div class="space-y-3">
-                ${requestsHTML || '<p class="text-sm text-gray-500">Brak aktywnych wniosków.</p>'}
+    <div class="lg:col-span-1">
+        <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card h-full">
+            <h2 class="text-lg font-semibold mb-4">Mój karnet</h2>
+            <div class="text-center py-8">
+                <p class="text-5xl font-bold text-emerald-600">${subscription.entriesLeft}</p>
+                <p class="text-gray-500">pozostało wejść</p>
             </div>
+            <div class="text-sm text-gray-600">
+                <p><strong>Typ:</strong> ${subscription.type}</p>
+                <p><strong>Ważny do:</strong> ${subscription.expires} (${daysLeft > 0 ? `${daysLeft} dni` : 'Wygasł'})</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="lg:col-span-2">
+        <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card flex flex-col h-full">
+            
+            <div class="tab-container" id="client-dashboard-tabs">
+                <button class="tab-button ${state.clientDashboardTab === 'history' ? 'active' : ''}" data-tab="history">
+                    Historia wizyt
+                </button>
+                <button class="tab-button ${state.clientDashboardTab === 'requests' ? 'active' : ''}" data-tab="requests">
+                    Status wniosków
+                </button>
+            </div>
+
+            <div class="flex-grow min-h-0">
+                <div class="tab-content card-scroll-content ${state.clientDashboardTab === 'history' ? 'active' : ''}" id="history-content">
+                    <ul class="space-y-3">
+                        ${historyHTML || '<p class="text-sm text-gray-500">Brak historii.</p>'}
+                    </ul>
+                </div>
+
+                <div class="tab-content card-scroll-content ${state.clientDashboardTab === 'requests' ? 'active' : ''}" id="requests-content">
+                    <div class="space-y-3">
+                        ${requestsHTML || '<p class="text-sm text-gray-500">Brak aktywnych wniosków.</p>'}
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 `;

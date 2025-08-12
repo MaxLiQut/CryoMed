@@ -1,5 +1,6 @@
 // 'export' дозволяє іншим файлам імпортувати цей об'єкт
 export let state = {
+    clientDashboardTab: 'history',
     activeModalTab: 'tab-main',
     currentClientId: 1,
     clients: [

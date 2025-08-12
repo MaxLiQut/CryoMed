@@ -266,9 +266,11 @@ function setupClientDashboardListeners() {
     clientDashboard.addEventListener('click', (event) => {
         const target = event.target;
 
-        if (target.id === 'requestSpecialTermBtn') {
-            state.appointmentToChangeId = null;
-            openSpecialTermModal();
+        // НОВИЙ КОД для перемикання табів
+        if (target.closest('#client-dashboard-tabs') && target.dataset.tab) {
+            state.clientDashboardTab = target.dataset.tab;
+            render.renderClientDashboard();
+            return; // Виходимо, щоб не обробляти інші кліки
         }
 
         if (target.classList.contains('time-slot') && !target.disabled) {
