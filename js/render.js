@@ -108,32 +108,36 @@ export function renderClientDashboard() {
     }).join('');
 
     document.getElementById('client-info-container').innerHTML = `
-        <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card">
-            <h2 class="text-lg font-semibold mb-4">Mój karnet</h2>
-            <div class="text-center py-8">
-                <p class="text-5xl font-bold text-emerald-600">${subscription.entriesLeft}</p>
-                <p class="text-gray-500">pozostało wejść</p>
-            </div>
-            <div class="text-sm text-gray-600">
-                <p><strong>Typ:</strong> ${subscription.type}</p>
-                <p><strong>Ważny do:</strong> ${subscription.expires} (${daysLeft > 0 ? `${daysLeft} dni` : 'Wygasł'})</p>
-            </div>
+    <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card">
+        <h2 class="text-lg font-semibold mb-4">Mój karnet</h2>
+        <div class="text-center py-8">
+            <p class="text-5xl font-bold text-emerald-600">${subscription.entriesLeft}</p>
+            <p class="text-gray-500">pozostało wejść</p>
         </div>
+        <div class="text-sm text-gray-600">
+            <p><strong>Typ:</strong> ${subscription.type}</p>
+            <p><strong>Ważny do:</strong> ${subscription.expires} (${daysLeft > 0 ? `${daysLeft} dni` : 'Wygasł'})</p>
+        </div>
+    </div>
 
-        <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card equal-height-card">
-            <h2 class="text-lg font-semibold mb-4">Historia wizyt</h2>
-            <div class="space-y-3 card-scroll-content">
+    <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card equal-height-card">
+        <h2 class="text-lg font-semibold mb-4">Historia wizyt</h2>
+        <div class="card-scroll-content">
+            <ul class="space-y-3">
                 ${historyHTML || '<p class="text-sm text-gray-500">Brak historii.</p>'}
-            </div>
+            </ul>
         </div>
+    </div>
 
-        <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card equal-height-card">
-            <h2 class="text-lg font-semibold mb-4">Status wniosków</h2>
-            <div class="space-y-3 card-scroll-content">
+    <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card equal-height-card">
+        <h2 class="text-lg font-semibold mb-4">Status wniosków</h2>
+        <div class="card-scroll-content">
+            <div class="space-y-3">
                 ${requestsHTML || '<p class="text-sm text-gray-500">Brak aktywnych wniosków.</p>'}
             </div>
         </div>
-    `;
+    </div>
+`;
 
     renderAppointments();
 }

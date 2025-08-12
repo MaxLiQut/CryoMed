@@ -242,13 +242,6 @@ body {
     padding-right: 8px;
 }
 
-/* Короткий список для панелі клієнта */
-.scroll-list-client {
-    overflow-y: auto;
-    padding-right: 8px;
-    min-height: 0;
-}
-
 .equal-height-card {
     display: grid;
     grid-template-rows: auto 1fr;
