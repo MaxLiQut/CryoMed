@@ -39,38 +39,36 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg flex flex-col">
-                    <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg flex flex-col h-full">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-lg font-semibold">Lista klientów</h2>
-                            <div class="flex items-center space-x-2">
-                                <input type="text" id="searchInput" placeholder="Szukaj po nazwisku..."
-                                    class="px-3 py-1 border border-gray-300 rounded-md text-sm">
-                                <select id="filterSelect" class="px-3 py-1 border border-gray-300 rounded-md text-sm">
-                                    <option value="all">Wszyscy</option>
-                                    <option value="expiresSoon">Karnet kończy się wkrótce</option>
-                                    <option value="lowEntries">Mało wejść</option>
-                                </select>
-                            </div>
+                <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg flex flex-col h-full">
+                    <div class="flex justify-between items-center mb-4 flex-shrink-0">
+                        <h2 class="text-lg font-semibold">Lista klientów</h2>
+                        <div class="flex items-center space-x-2">
+                            <input type="text" id="searchInput" placeholder="Szukaj po nazwisku..."
+                                class="px-3 py-1 border border-gray-300 rounded-md text-sm">
+                            <select id="filterSelect" class="px-3 py-1 border border-gray-300 rounded-md text-sm">
+                                <option value="all">Wszyscy</option>
+                                <option value="expiresSoon">Karnet kończy się wkrótce</option>
+                                <option value="lowEntries">Mało wejść</option>
+                            </select>
                         </div>
-                        <div id="clients-list-container" class="space-y-4 fill-and-scroll flex-grow min-h-0 pr-2"></div>
-                        <button id="addClientBtn"
-                            class="mt-6 w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg flex-shrink-0">Zarejestruj
-                            nowego klienta</button>
                     </div>
+                    <div id="clients-list-container" class="space-y-4 fill-and-scroll flex-grow min-h-0 pr-2"></div>
+                    <button id="addClientBtn"
+                        class="mt-6 w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg flex-shrink-0">Zarejestruj
+                        nowego klienta</button>
+                </div>
 
-                    <div class="bg-white p-6 rounded-xl shadow-lg flex flex-col">
-                        <div class="bg-white p-6 rounded-xl shadow-lg flex flex-col h-full">
-                            <h2 class="text-lg font-semibold mb-4">Wnioski od klientów</h2>
-                            <div id="requests-container" class="space-y-3 fill-and-scroll flex-grow min-h-0 pr-2"></div>
-                        </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg flex flex-col h-full">
+                    <h2 class="text-lg font-semibold mb-4 flex-shrink-0">Wnioski od klientów</h2>
+                    <div id="requests-container" class="space-y-3 fill-and-scroll flex-grow min-h-0 pr-2"></div>
+                </div>
 
-                    </div>
+            </div>
 
-                    <div class="mt-6 bg-white p-6 rounded-xl shadow-lg dashboard-card">
-                        <h2 class="text-lg font-semibold mb-4">Kalendarz wizyt</h2>
-                        <div id="admin-calendar-container"></div>
-                    </div>
+            <div class="mt-6 bg-white p-6 rounded-xl shadow-lg dashboard-card">
+                <h2 class="text-lg font-semibold mb-4">Kalendarz wizyt</h2>
+                <div id="admin-calendar-container"></div>
+            </div>
         </main>
     </div>
 
