@@ -71,24 +71,17 @@ export function renderClientDashboard() {
 
     const requestsHTML = [...state.requests].reverse().map((req, reversedIndex) => {
         const originalIndex = state.requests.length - 1 - reversedIndex;
-
         if (req.clientId === client.id) {
             let bgColor = 'bg-blue-100 border-blue-500 text-blue-700';
             let buttonsHTML = '';
-
             switch (req.status) {
-                case 'pending_admin_approval':
-                    break;
+                case 'pending_admin_approval': break;
                 case 'pending_client_approval':
                     bgColor = 'bg-purple-100 border-purple-500 text-purple-800';
                     buttonsHTML = `<div class="mt-2 text-right space-x-3"><button data-request-index="${originalIndex}" class="reject-proposal-btn font-semibold hover:underline">Odrzuć</button><button data-request-index="${originalIndex}" class="accept-proposal-btn font-semibold text-green-600 hover:underline">Akceptuj</button></div>`;
                     break;
-                case 'confirmed':
-                    bgColor = 'bg-green-100 border-green-500 text-green-800';
-                    break;
-                case 'rejected':
-                    bgColor = 'bg-red-100 border-red-500 text-red-800';
-                    break;
+                case 'confirmed': bgColor = 'bg-green-100 border-green-500 text-green-800'; break;
+                case 'rejected': bgColor = 'bg-red-100 border-red-500 text-red-800'; break;
             }
             return `<div class="${bgColor} border-l-4 p-3 rounded-md"><p class="text-sm">${req.details}</p>${buttonsHTML}</div>`;
         }
@@ -127,16 +120,16 @@ export function renderClientDashboard() {
             </div>
         </div>
 
-        <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card">
+        <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card equal-height-card">
             <h2 class="text-lg font-semibold mb-4">Historia wizyt</h2>
-            <ul class="space-y-3 scroll-list-client">
+            <div class="space-y-3 card-scroll-content">
                 ${historyHTML || '<p class="text-sm text-gray-500">Brak historii.</p>'}
-            </ul>
+            </div>
         </div>
 
-        <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card">
+        <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card equal-height-card">
             <h2 class="text-lg font-semibold mb-4">Status wniosków</h2>
-            <div class="space-y-3 scroll-list-client">
+            <div class="space-y-3 card-scroll-content">
                 ${requestsHTML || '<p class="text-sm text-gray-500">Brak aktywnych wniosków.</p>'}
             </div>
         </div>

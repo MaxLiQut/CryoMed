@@ -244,7 +244,18 @@ body {
 
 /* Короткий список для панелі клієнта */
 .scroll-list-client {
-    max-height: 240px; /* Можна налаштувати */
     overflow-y: auto;
     padding-right: 8px;
+    min-height: 0;
+}
+
+.equal-height-card {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    height: 100%;
+}
+
+.card-scroll-content {
+    overflow-y: auto;
+    min-height: 0;
 }
