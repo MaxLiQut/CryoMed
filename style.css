@@ -252,3 +252,16 @@ body {
     overflow-y: auto;
     min-height: 0;
 }
+
+
+/* Make client info grid items not stretch each other; allow inner scroll */
+#client-info-container { align-items: start; }
+#client-info-container .dashboard-card { display: flex; flex-direction: column; }
+#client-info-container .dashboard-card .tab-container { flex: 0 0 auto; }
+#client-info-container .dashboard-card .flex-grow { flex: 1 1 auto; min-height: 0; }
+
+
+/* Client right card scroll fix */
+#client-scroll-container { display: block; height: 100%; }
+#client-scroll-container .tab-content.card-scroll-content { height: 100%; overflow-y: auto; }
+#client-scroll-container .tab-content { padding-right: 8px; box-sizing: border-box; }

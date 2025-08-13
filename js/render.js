@@ -1,5 +1,23 @@
 import { state } from './state.js';
 
+// Keeps the right client card (tabs) the same height as the left 'Mój karnet' card,
+// and enables internal scrolling instead of growing the whole grid row.
+function syncClientCardHeights() {
+    const grid = document.getElementById('client-info-container');
+    if (!grid) return;
+    const leftCard = grid.querySelector('.lg\\:col-span-1 .dashboard-card');
+    const rightCard = grid.querySelector('.lg\\:col-span-2 .dashboard-card');
+    if (!(leftCard && rightCard)) return;
+    // Reset before measuring
+    rightCard.style.height = '';
+    rightCard.style.maxHeight = '';
+    const h = leftCard.getBoundingClientRect().height;
+    if (h > 0) {
+        rightCard.style.height = h + 'px';
+        rightCard.style.maxHeight = h + 'px';
+    }
+}
+
 export function renderStatistics() {
     const { stats } = state;
     document.getElementById('stats-container').innerHTML = `<div class="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-4 dashboard-card"><div><p class="text-2xl font-bold text-gray-800">${stats.total}</p><p class="text-sm text-gray-500">Wszystkich karnetów</p></div></div><div class="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-4 dashboard-card"><div><p class="text-2xl font-bold text-gray-800">${stats.active}</p><p class="text-sm text-gray-500">Aktywnych karnetów</p></div></div><div class="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-4 dashboard-card"><div><p class="text-2xl font-bold text-gray-800">${stats.expired}</p><p class="text-sm text-gray-500">Zakończonych karnetów</p></div></div>`;
@@ -134,7 +152,7 @@ export function renderClientDashboard() {
                 </button>
             </div>
 
-            <div class="flex-grow min-h-0">
+            <div class="flex-grow min-h-0 overflow-hidden" id="client-scroll-container">
                 <div class="tab-content card-scroll-content ${state.clientDashboardTab === 'history' ? 'active' : ''}" id="history-content">
                     <ul class="space-y-3">
                         ${historyHTML || '<p class="text-sm text-gray-500">Brak historii.</p>'}
@@ -153,7 +171,10 @@ export function renderClientDashboard() {
 `;
 
     renderAppointments();
+    // sync heights so right card scrolls instead of stretching
+    syncClientCardHeights();
 }
+
 
 export function renderAppointments() {
     const appointmentsList = document.getElementById('appointments-list');

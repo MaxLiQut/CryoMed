@@ -15,8 +15,8 @@ export let state = {
     appointmentToEditId: null,
     requestToEditIndex: null,
     requests: [
-        { from: 'Maria Nowak', clientId: 2, type: 'Termin Specjalny', details: 'Prośba o wizytę: WT 11:00' },
-        { from: 'Jan Kowalski', clientId: 1, type: 'Akceptacja', details: 'Zaakceptował Twoją propozycję na PT 19:00' }
+{ from: 'Maria Nowak', clientId: 2, type: 'Termin Specjalny', details: 'Prośba o wizytę: WT 11:00' , status: 'pending_admin_approval' },
+        { from: 'Jan Kowalski', clientId: 1, type: 'Akceptacja', details: 'Zaakceptował Twoją propozycję na PT 19:00' , status: 'pending_admin_approval' }
     ],
     stats: { total: 50, active: 35, expired: 15 },
     clientToDeleteId: null,

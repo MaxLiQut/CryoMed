@@ -1,6 +1,57 @@
 import { state } from './state.js';
 import * as render from './render.js';
 
+document.getElementById('manageClientModalBody').addEventListener('click', (event) => {
+    const target = event.target;
+    if (target.classList.contains('tab-button')) {
+        event.preventDefault();
+        state.activeModalTab = target.dataset.tab;
+        const modalBody = document.getElementById('manageClientModalBody');
+        modalBody.querySelectorAll('.tab-button').forEach(tab => tab.classList.remove('active'));
+        modalBody.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        target.classList.add('active');
+        document.getElementById(state.activeModalTab).classList.add('active');
+    }
+    // Cancel should work in both add & edit modes
+    if (target.id === 'cancelManageClientBtn') {
+        state.activeModalTab = 'tab-main';
+        closeManageClientModal();
+        return;
+    }
+    const form = document.getElementById('manageClientModalBody').querySelector('form');
+    const isEditMode = !!(form && form.dataset.clientId);
+    if (!isEditMode) {
+        // In add mode we don't handle history/delete actions
+        return;
+    }
+    const clientId = parseInt(form.dataset.clientId, 10);
+    const client = state.clients.find(c => c.id === clientId);
+    if (!client) return;
+    if (target.id === 'deleteClientBtn') openDeleteConfirmationModal(clientId);
+    if (target.id === 'addHistoryBtn') {
+        const dateInput = document.getElementById('newHistoryDate');
+        const durationInput = document.getElementById('newHistoryDuration');
+        const statusInput = document.getElementById('newHistoryStatus');
+        const tempInput = document.getElementById('newHistoryTemp');
+        if (!dateInput.value || !durationInput.value) return;
+        client.history.push({
+            date: dateInput.value,
+            duration: durationInput.value,
+            status: statusInput.value,
+            temperature: tempInput.value ? parseInt(tempInput.value, 10) : null
+        });
+        state.activeModalTab = 'tab-history';
+        render.renderClientForm({ mode: 'edit', client: client });
+    }
+});
+
+
+// --- utilities ---
+const nextId = (arr) => (arr && arr.length ? Math.max(...arr.map(a => a.id || 0)) + 1 : 1);
+const isBusy = (date, time) => state.appointments && state.appointments.some(a => a.date === date && a.time === time);
+// --- end utilities ---
+
+
 // === ACTIONS / LOGIC (Функції-помічники) ===
 
 function login(role) {
@@ -399,145 +450,171 @@ function setupModalListeners() {
             render.renderClientForm({ mode: 'edit', client: client });
         }
     });
+
     document.getElementById('manageClientModalBody').addEventListener('submit', (event) => {
         if (event.target.id === 'manage-client-form') {
             event.preventDefault();
-            const clientId = parseInt(event.target.dataset.clientId, 10);
-            updateClient(clientId, {
-                name: event.target.querySelector('#clientName').value,
-                entriesLeft: event.target.querySelector('#entriesLeft').value,
-                expires: event.target.querySelector('#expires').value
-            });
-            const notes = event.target.querySelector('#clientNotes');
-            if (notes) {
-                const client = state.clients.find(c => c.id === clientId);
-                client.notes = notes.value;
-            }
-            render.renderClientsList();
-            closeManageClientModal();
-        }
-    });
-    document.getElementById('cancelDeleteBtn').addEventListener('click', closeDeleteConfirmationModal);
-    document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
-        if (state.clientToDeleteId) {
-            deleteClient(state.clientToDeleteId);
-            closeDeleteConfirmationModal();
-            closeManageClientModal();
-            render.renderClientsList();
-        }
-    });
-    document.getElementById('cancelSpecialTermBtn').addEventListener('click', closeSpecialTermModal);
-    document.getElementById('specialTermForm').addEventListener('submit', (event) => {
-        event.preventDefault();
-        const requestedDate = document.getElementById('specialDate').value;
-        const requestedTime = document.getElementById('specialTime').value;
-        if (!requestedDate || !requestedTime) {
-            alert('Proszę wybrać datę i godzinę.');
-            return;
-        }
-        const client = state.clients.find(c => c.id === state.currentClientId);
-        let detailsText = '';
-        let requestType = 'Termin Specjalny';
-        if (state.appointmentToChangeId !== null) {
-            const appointmentIndex = state.appointments.findIndex(a => a.id === state.appointmentToChangeId);
-            if (appointmentIndex === -1) return;
-            const originalAppointment = state.appointments[appointmentIndex];
-            requestType = 'Prośba o zmianę terminu';
-            detailsText = `Klient prosi o zmianę terminu z <strong>${originalAppointment.date} o ${originalAppointment.time}</strong> na <strong>${requestedDate} o ${requestedTime}</strong>.`;
-            state.appointments.splice(appointmentIndex, 1);
-            state.appointmentToChangeId = null;
-        } else {
-            detailsText = `Prośba o wizytę: ${requestedDate} o ${requestedTime}`;
-        }
-        const newRequest = { from: client.name, clientId: client.id, type: requestType, details: detailsText, status: 'pending_admin_approval' };
-        state.requests.push(newRequest);
-        alert('Twoja prośba została wysłana!');
-        render.renderClientDashboard();
-        closeSpecialTermModal();
-        document.getElementById('specialTermForm').reset();
-    });
-    document.getElementById('cancelProposeTimeBtn').addEventListener('click', closeProposeTimeModal);
-    document.getElementById('proposeTimeForm').addEventListener('submit', (event) => {
-        event.preventDefault();
-        const newDate = document.getElementById('proposeDate').value;
-        const newTime = document.getElementById('proposeTime').value;
-        if (!newDate || !newTime) {
-            alert('Proszę wybrać nową datę i godzinę.');
-            return;
-        }
-        if (state.appointmentToEditId !== null) {
-            const appointmentIndex = state.appointments.findIndex(a => a.id === state.appointmentToEditId);
-            if (appointmentIndex === -1) return;
-            const originalAppointment = state.appointments[appointmentIndex];
-            const client = state.clients.find(c => c.id === originalAppointment.clientId);
-            const newRequest = { from: 'Administrator', clientId: client.id, type: 'Propozycja zmiany', details: `Zaproponowano zmianę terminu z ${originalAppointment.date} ${originalAppointment.time} na <strong>${newDate} o ${newTime}</strong>.`, status: 'pending_client_approval' };
-            state.requests.push(newRequest);
-            state.appointments.splice(appointmentIndex, 1);
-        } else if (state.requestToEditIndex !== null) {
-            const originalRequest = state.requests[state.requestToEditIndex];
-            if (!originalRequest) return;
-            originalRequest.details = `Administrator zaproponował nowy termin: <strong>${newDate} o ${newTime}</strong>.`;
-            originalRequest.status = 'pending_client_approval';
-        }
-        state.appointmentToEditId = null;
-        state.requestToEditIndex = null;
-        render.renderRequests();
-        render.renderAdminCalendar();
-        closeProposeTimeModal();
-        document.getElementById('proposeTimeForm').reset();
-        alert('Propozycja zmiany terminu została wysłana do klienta!');
-    });
-    document.getElementById('closeDayDetailsModalBtn').addEventListener('click', closeDayDetailsModal);
-    document.getElementById('dayDetailsModalBody').addEventListener('click', (event) => {
-        const target = event.target;
-
-        if (target.dataset.action === 'open-create-appointment-from-details') {
-            openCreateAppointmentFromDetails(target.dataset.date);
-            return;
-        }
-
-        const appointmentId = parseInt(target.dataset.appointmentId, 10);
-        if (!appointmentId) return;
-
-        if (target.classList.contains('manage-appointment-btn')) {
-            openProposeTimeModal({ appointmentId });
-        }
-        if (target.classList.contains('delete-appointment-btn')) {
-            if (confirm('Czy na pewno chcesz usunąć tę wizytę? Klient nie zostanie obciążony karą.')) {
-                const appointmentIndex = state.appointments.findIndex(a => a.id === appointmentId);
-                if (appointmentIndex > -1) {
-                    const deletedAppointment = state.appointments[appointmentIndex];
-                    state.appointments.splice(appointmentIndex, 1);
-                    closeDayDetailsModal();
-                    render.renderAdminCalendar();
-                    showDayDetails(deletedAppointment.date);
-                    alert('Wizyta została usunięta.');
+            const form = event.target;
+            const isEditMode = !!form.dataset.clientId;
+            if (isEditMode) {
+                const clientId = parseInt(form.dataset.clientId, 10);
+                updateClient(clientId, {
+                    name: form.querySelector('#clientName').value,
+                    entriesLeft: form.querySelector('#entriesLeft').value,
+                    expires: form.querySelector('#expires').value
+                });
+                const notes = form.querySelector('#clientNotes');
+                if (notes) {
+                    const client = state.clients.find(c => c.id === clientId);
+                    client.notes = notes.value || '';
                 }
+                render.renderClientsList();
+                closeManageClientModal();
+                // persist(); // (disabled, no API adapter connected)
+            } else {
+                // ADD MODE: create a brand-new client
+                const name = form.querySelector('#clientName').value.trim();
+                const entriesLeft = parseInt(form.querySelector('#entriesLeft').value, 10) || 0;
+                const expires = form.querySelector('#expires').value;
+                const notesEl = form.querySelector('#clientNotes');
+                const notes = notesEl ? (notesEl.value || '') : '';
+                if (!name || !expires) { alert('Uzupełnij imię/nazwisko oraz datę ważności.'); return; }
+                const newClient = {
+                    id: nextId(state.clients),
+                    name,
+                    contact: '',
+                    subscription: { entriesLeft, expires },
+                    history: [],
+                    notes
+                };
+                state.clients.push(newClient);
+                render.renderClientsList();
+                closeManageClientModal();
+                // persist(); // (disabled, no API adapter connected)
             }
         }
     });
-    document.getElementById('cancelCreateAppointmentBtn').addEventListener('click', closeCreateAppointmentModal);
-    document.getElementById('createAppointmentForm').addEventListener('submit', (event) => {
-        event.preventDefault();
-        const form = event.target;
-        const date = form.querySelector('#appointmentDateInput').value;
-        const time = form.querySelector('#appointmentTime').value;
-        const clientId = parseInt(form.querySelector('#clientSelect').value, 10);
-        const client = state.clients.find(c => c.id === clientId);
-        if (!client) return;
-        if (client.subscription.entriesLeft <= 0) {
-            alert('Ten klient nie ma już dostępnych wejść w karnecie!');
-            return;
-        }
-        const newAppointment = { id: state.appointments.length > 0 ? Math.max(...state.appointments.map(a => a.id)) + 1 : 1, date: date, time: time, clientId: clientId };
-        state.appointments.push(newAppointment);
-        closeCreateAppointmentModal();
-        render.renderAdminCalendar();
+document.getElementById('cancelDeleteBtn').addEventListener('click', closeDeleteConfirmationModal);
+document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+    if (state.clientToDeleteId) {
+        deleteClient(state.clientToDeleteId);
+        closeDeleteConfirmationModal();
+        closeManageClientModal();
         render.renderClientsList();
-        showDayDetails(date);
-    });
-}
+    }
+});
+document.getElementById('cancelSpecialTermBtn').addEventListener('click', closeSpecialTermModal);
+document.getElementById('specialTermForm').addEventListener('submit', (event) => {
+    event.preventDefault();
+    const requestedDate = document.getElementById('specialDate').value;
+    const requestedTime = document.getElementById('specialTime').value;
+    if (!requestedDate || !requestedTime) {
+        alert('Proszę wybrać datę i godzinę.');
+        return;
+    }
+    const client = state.clients.find(c => c.id === state.currentClientId);
+    let detailsText = '';
+    let requestType = 'Termin Specjalny';
+    if (state.appointmentToChangeId !== null) {
+        const appointmentIndex = state.appointments.findIndex(a => a.id === state.appointmentToChangeId);
+        if (appointmentIndex === -1) return;
+        const originalAppointment = state.appointments[appointmentIndex];
+        requestType = 'Prośba o zmianę terminu';
+        detailsText = `Klient prosi o zmianę terminu z <strong>${originalAppointment.date} o ${originalAppointment.time}</strong> na <strong>${requestedDate} o ${requestedTime}</strong>.`;
+        state.appointments.splice(appointmentIndex, 1);
+        state.appointmentToChangeId = null;
+    } else {
+        detailsText = `Prośba o wizytę: ${requestedDate} o ${requestedTime}`;
+    }
+    const newRequest = { from: client.name, clientId: client.id, type: requestType, details: detailsText, status: 'pending_admin_approval' };
+    state.requests.push(newRequest);
+    alert('Twoja prośba została wysłana!');
+    render.renderClientDashboard();
+    closeSpecialTermModal();
+    document.getElementById('specialTermForm').reset();
+});
+document.getElementById('cancelProposeTimeBtn').addEventListener('click', closeProposeTimeModal);
+document.getElementById('proposeTimeForm').addEventListener('submit', (event) => {
+    event.preventDefault();
+    const newDate = document.getElementById('proposeDate').value;
+    const newTime = document.getElementById('proposeTime').value;
+    if (!newDate || !newTime) {
+        alert('Proszę wybrać nową datę i godzinę.');
+        return;
+    }
+    if (state.appointmentToEditId !== null) {
+        const appointmentIndex = state.appointments.findIndex(a => a.id === state.appointmentToEditId);
+        if (appointmentIndex === -1) return;
+        const originalAppointment = state.appointments[appointmentIndex];
+        const client = state.clients.find(c => c.id === originalAppointment.clientId);
+        const newRequest = { from: 'Administrator', clientId: client.id, type: 'Propozycja zmiany', details: `Zaproponowano zmianę terminu z ${originalAppointment.date} ${originalAppointment.time} na <strong>${newDate} o ${newTime}</strong>.`, status: 'pending_client_approval' };
+        state.requests.push(newRequest);
+        state.appointments.splice(appointmentIndex, 1);
+    } else if (state.requestToEditIndex !== null) {
+        const originalRequest = state.requests[state.requestToEditIndex];
+        if (!originalRequest) return;
+        originalRequest.details = `Administrator zaproponował nowy termin: <strong>${newDate} o ${newTime}</strong>.`;
+        originalRequest.status = 'pending_client_approval';
+    }
+    state.appointmentToEditId = null;
+    state.requestToEditIndex = null;
+    render.renderRequests();
+    render.renderAdminCalendar();
+    closeProposeTimeModal();
+    document.getElementById('proposeTimeForm').reset();
+    alert('Propozycja zmiany terminu została wysłana do klienta!');
+});
+document.getElementById('closeDayDetailsModalBtn').addEventListener('click', closeDayDetailsModal);
+document.getElementById('dayDetailsModalBody').addEventListener('click', (event) => {
+    const target = event.target;
 
+    if (target.dataset.action === 'open-create-appointment-from-details') {
+        openCreateAppointmentFromDetails(target.dataset.date);
+        return;
+    }
+
+    const appointmentId = parseInt(target.dataset.appointmentId, 10);
+    if (!appointmentId) return;
+
+    if (target.classList.contains('manage-appointment-btn')) {
+        openProposeTimeModal({ appointmentId });
+    }
+    if (target.classList.contains('delete-appointment-btn')) {
+        if (confirm('Czy na pewno chcesz usunąć tę wizytę? Klient nie zostanie obciążony karą.')) {
+            const appointmentIndex = state.appointments.findIndex(a => a.id === appointmentId);
+            if (appointmentIndex > -1) {
+                const deletedAppointment = state.appointments[appointmentIndex];
+                state.appointments.splice(appointmentIndex, 1);
+                closeDayDetailsModal();
+                render.renderAdminCalendar();
+                showDayDetails(deletedAppointment.date);
+                alert('Wizyta została usunięta.');
+            }
+        }
+    }
+});
+document.getElementById('cancelCreateAppointmentBtn').addEventListener('click', closeCreateAppointmentModal);
+document.getElementById('createAppointmentForm').addEventListener('submit', (event) => {
+    event.preventDefault();
+    const form = event.target;
+    const date = form.querySelector('#appointmentDateInput').value;
+    const time = form.querySelector('#appointmentTime').value;
+    const clientId = parseInt(form.querySelector('#clientSelect').value, 10);
+    const client = state.clients.find(c => c.id === clientId);
+    if (!client) return;
+    if (client.subscription.entriesLeft <= 0) {
+        alert('Ten klient nie ma już dostępnych wejść w karnecie!');
+        return;
+    }
+    const newAppointment = { id: state.appointments.length > 0 ? Math.max(...state.appointments.map(a => a.id)) + 1 : 1, date: date, time: time, clientId: clientId };
+    state.appointments.push(newAppointment);
+    closeCreateAppointmentModal();
+    render.renderAdminCalendar();
+    render.renderClientsList();
+    showDayDetails(date);
+});
+
+}
 function setupCalendarListeners() {
     const calendarContainer = document.querySelector('body'); // Listen on the whole body
     calendarContainer.addEventListener('click', (event) => {
