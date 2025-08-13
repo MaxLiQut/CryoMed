@@ -86,6 +86,7 @@ async function withButtonLock(btn, work) {
 
 document.getElementById('manageClientModalBody').addEventListener('click', (event) => {
     const target = event.target;
+
     if (target.classList.contains('tab-button')) {
         event.preventDefault();
         state.activeModalTab = target.dataset.tab;
@@ -441,7 +442,14 @@ function setupClientDashboardListeners() {
     clientDashboard.addEventListener('click', (event) => {
         const target = event.target;
 
-        // НОВИЙ КОД для перемикання табів
+        
+        // Handle "Zaproponuj własny" (client proposes custom date/time)
+        if (target.id === 'requestSpecialTermBtn' || (target.closest && target.closest('#requestSpecialTermBtn'))) {
+            state.appointmentToChangeId = null; // new request, not reschedule
+            openSpecialTermModal();
+            return;
+        }
+// НОВИЙ КОД для перемикання табів
         if (target.closest('#client-dashboard-tabs') && target.dataset.tab) {
             state.clientDashboardTab = target.dataset.tab;
             render.renderClientDashboard();
@@ -761,7 +769,7 @@ function setupModalListeners() {
         const btn = event.target.querySelector('button[type="submit"]');
         const form = event.target;
         const date = form.querySelector('#appointmentDateInput').value;
-        const time = form.querySelector('#appointmentTimeInput').value;
+        const time = form.querySelector('#appointmentTime').value;
         const clientId = parseInt(form.querySelector('#clientSelect').value, 10);
         const client = state.clients.find((c) => c.id === clientId);
         if (!client) return;

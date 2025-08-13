@@ -287,3 +287,92 @@ body {
 .theme-toggle.active .dot { transform: translateX(20px); }
 :root[data-theme="dark"] .theme-toggle { background:#0f152b; border-color: rgba(255,255,255,.14); }
 :root[data-theme="dark"] .theme-toggle .dot { background:#e5e7eb; }
+
+
+/* === Login buttons: force white text in dark theme (only these two) === */
+:root[data-theme="dark"] #loginAdminBtn,
+:root[data-theme="dark"] #loginClientBtn {
+  color: #ffffff !important;
+}
+
+
+/* ===== DARK THEME — consolidated fixes ===== */
+
+/* Color tokens */
+:root[data-theme="dark"] {
+  --bg:#0b1220;
+  --surface-1:#111a2f;
+  --surface-2:#0f172a;
+  --surface-3:#18223f;
+  --border:#24304f;
+  --text:#e6ebf5;
+  --muted:#a7b3cc;
+}
+
+/* Page + cards */
+:root[data-theme="dark"] body { background-color: var(--bg) !important; color: var(--text) !important; }
+:root[data-theme="dark"] .dashboard-card { background-color: var(--surface-1) !important; box-shadow: 0 0 0 1px rgba(36,48,79,.55) inset, 0 10px 20px rgba(0,0,0,.35) !important; }
+:root[data-theme="dark"] header { background-color: var(--surface-2) !important; }
+
+/* --- FINAL text model --- */
+:root[data-theme="dark"] .text-black,
+:root[data-theme="dark"] .text-gray-900,
+:root[data-theme="dark"] .text-gray-800,
+:root[data-theme="dark"] .text-gray-700 { color: var(--text) !important; }
+
+/* Exception only when the element itself is a light surface */
+:root[data-theme="dark"] .bg-white.text-black,
+:root[data-theme="dark"] .bg-white.text-gray-900,
+:root[data-theme="dark"] .bg-white.text-gray-800,
+:root[data-theme="dark"] .bg-white.text-gray-700,
+:root[data-theme="dark"] .bg-gray-50.text-black,
+:root[data-theme="dark"] .bg-gray-50.text-gray-900,
+:root[data-theme="dark"] .bg-gray-50.text-gray-800,
+:root[data-theme="dark"] .bg-gray-50.text-gray-700,
+:root[data-theme="dark"] .bg-gray-100.text-black,
+:root[data-theme="dark"] .bg-gray-100.text-gray-900,
+:root[data-theme="dark"] .bg-gray-100.text-gray-800,
+:root[data-theme="dark"] .bg-gray-100.text-gray-700,
+:root[data-theme="dark"] .bg-gray-200.text-black,
+:root[data-theme="dark"] .bg-gray-200.text-gray-900,
+:root[data-theme="dark"] .bg-gray-200.text-gray-800,
+:root[data-theme="dark"] .bg-gray-200.text-gray-700,
+:root[data-theme="dark"] .bg-gray-300.text-black,
+:root[data-theme="dark"] .bg-gray-300.text-gray-900,
+:root[data-theme="dark"] .bg-gray-300.text-gray-800,
+:root[data-theme="dark"] .bg-gray-300.text-gray-700 { color:#111827 !important; }
+
+/* Buttons: brand colors readable */
+:root[data-theme="dark"] button[class*="bg-indigo-"],
+:root[data-theme="dark"] a[class*="bg-indigo-"],
+:root[data-theme="dark"] [role="button"][class*="bg-indigo-"],
+:root[data-theme="dark"] button[class*="bg-purple-"],
+:root[data-theme="dark"] a[class*="bg-purple-"],
+:root[data-theme="dark"] [role="button"][class*="bg-purple-"],
+:root[data-theme="dark"] button[class*="bg-green-"],
+:root[data-theme="dark"] a[class*="bg-green-"],
+:root[data-theme="dark"] [role="button"][class*="bg-green-"] { color:#fff !important; }
+
+/* White/light buttons keep dark text */
+:root[data-theme="dark"] button.bg-white,
+:root[data-theme="dark"] [role="button"].bg-white,
+:root[data-theme="dark"] button.bg-gray-50,
+:root[data-theme="dark"] button.bg-gray-100,
+:root[data-theme="dark"] button.bg-gray-200,
+:root[data-theme="dark"] button.bg-gray-300 { color:#111827 !important; }
+
+/* Modals */
+:root[data-theme="dark"] .modal-backdrop { background: rgba(8,12,24,.7) !important; }
+:root[data-theme="dark"] .modal-content { background: var(--surface-1) !important; color: var(--text) !important; box-shadow: 0 20px 50px rgba(0,0,0,.6) !important; border:1px solid var(--border) !important; }
+
+/* Calendar (client/admin) */
+:root[data-theme="dark"] .custom-calendar { background: var(--surface-1) !important; border:1px solid var(--border) !important; color: var(--text) !important; }
+:root[data-theme="dark"] .calendar-day-header { color: var(--muted) !important; }
+:root[data-theme="dark"] .calendar-day { color: var(--text) !important; }
+:root[data-theme="dark"] .calendar-day.available { background: var(--surface-2) !important; }
+:root[data-theme="dark"] .calendar-day.available:hover,
+:root[data-theme="dark"] .calendar-day.selected { background:#10b981 !important; color:#fff !important; }
+
+/* Login buttons only: force white text */
+:root[data-theme="dark"] #loginAdminBtn,
+:root[data-theme="dark"] #loginClientBtn { color:#fff !important; }

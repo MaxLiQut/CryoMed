@@ -12,6 +12,7 @@ export let state = {
     appointments: [
         { id: 1, date: '2025-08-22', time: '19:00', clientId: 1 }
     ],
+    appointmentToChangeId: null,
     appointmentToEditId: null,
     requestToEditIndex: null,
     requests: [
