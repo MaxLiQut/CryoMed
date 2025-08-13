@@ -254,33 +254,36 @@ body {
 }
 
 
-/* Make client info grid items not stretch each other; allow inner scroll */
+/* Keep strong brand colors for utility-colored buttons in dark theme */
+:root[data-theme="dark"] .bg-indigo-600 { background: #7c3aed !important; color:#fff !important; border-color: transparent !important; }
+:root[data-theme="dark"] .bg-indigo-600:hover { background:#6d28d9 !important; }
+:root[data-theme="dark"] .bg-blue-600 { background: #2563eb !important; color:#fff !important; border-color: transparent !important; }
+:root[data-theme="dark"] .bg-blue-600:hover { background:#1d4ed8 !important; }
+:root[data-theme="dark"] .bg-green-600 { background: #16a34a !important; color:#fff !important; border-color: transparent !important; }
+:root[data-theme="dark"] .bg-green-600:hover { background:#15803d !important; }
+
+:root[data-theme="dark"] .text-gray-400 { color:#aab3c5 !important; }
+
+
+/* Client panel equal-height + inner scroll */
 #client-info-container { align-items: start; }
 #client-info-container .dashboard-card { display: flex; flex-direction: column; }
 #client-info-container .dashboard-card .tab-container { flex: 0 0 auto; }
-#client-info-container .dashboard-card .flex-grow { flex: 1 1 auto; min-height: 0; }
+#client-info-container .dashboard-card .flex-grow { flex: 1 1 auto; min-height: 0; overflow: hidden; }
+#client-info-container .dashboard-card .card-scroll-content { height: 100%; overflow-y: auto; }
 
 
-/* Client right card scroll fix */
-#client-scroll-container { display: block; height: 100%; }
-#client-scroll-container .tab-content.card-scroll-content { height: 100%; overflow-y: auto; }
-#client-scroll-container .tab-content { padding-right: 8px; box-sizing: border-box; }
-
-
-/* Toast notifications */
-.toast {
-  position: fixed; top: 16px; right: 16px;
-  padding: 10px 12px; border-radius: 8px;
-  color: #fff; box-shadow: 0 6px 18px rgba(0,0,0,.2);
-  z-index: 9999; background: #2563eb;
+/* Theme toggle pill */
+.theme-toggle {
+  width: 46px; height: 26px; border-radius: 999px;
+  border: 1px solid rgba(2,6,23,.12);
+  display: inline-flex; align-items: center; position: relative;
+  background:#fff; cursor:pointer; padding:0;
 }
-.toast.success { background: #16a34a; }
-.toast.error   { background: #dc2626; }
-.toast.info    { background: #2563eb; }
-
-/* Focus style for calendar days */
-.calendar-day:focus {
-  outline: 2px solid #6366f1;
-  outline-offset: 2px;
-  border-radius: 6px;
+.theme-toggle .dot {
+  position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%;
+  background:#6366f1; transition: transform .2s ease;
 }
+.theme-toggle.active .dot { transform: translateX(20px); }
+:root[data-theme="dark"] .theme-toggle { background:#0f152b; border-color: rgba(255,255,255,.14); }
+:root[data-theme="dark"] .theme-toggle .dot { background:#e5e7eb; }
