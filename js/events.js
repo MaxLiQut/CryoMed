@@ -1,5 +1,67 @@
 import { state } from './state.js';
 import * as render from './render.js';
+// --- Toasts ---
+function toast(msg, type='info', ttl=2500){
+  const el = document.getElementById('toast');
+  try {
+    if (!el) return window.__origAlert ? __origAlert(msg) : console.log(msg);
+    el.textContent = msg;
+    el.className = `toast ${type}`;
+    el.classList.remove('hidden');
+    setTimeout(()=> el.classList.add('hidden'), ttl);
+  } catch(e) { console.log(msg); }
+}
+// route alert->toast for consistency
+const __origAlert = window.alert.bind(window);
+window.alert = (m) => toast(String(m), 'info');
+
+// --- Focus trap for modals ---
+const __focusTrap = new Map();
+function trapFocus(modalEl) {
+  const focusables = modalEl.querySelectorAll('a,button,input,select,textarea,[tabindex]:not([tabindex="-1"])');
+  if (!focusables.length) return;
+  const first = focusables[0], last = focusables[focusables.length - 1];
+  function onKey(e) {
+    if (e.key === 'Escape') { closeAnyOpenModal(); }
+    if (e.key !== 'Tab') return;
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+  modalEl.addEventListener('keydown', onKey);
+  __focusTrap.set(modalEl, onKey);
+  __focusTrap.set('returnFocus', document.activeElement);
+  first.focus();
+}
+function untrapFocus(modalEl) {
+  const onKey = __focusTrap.get(modalEl);
+  if (onKey) modalEl.removeEventListener('keydown', onKey);
+  __focusTrap.delete(modalEl);
+  const back = __focusTrap.get('returnFocus');
+  if (back && back.focus) back.focus();
+  __focusTrap.delete('returnFocus');
+}
+function closeAnyOpenModal() {
+  const ids = ['manageClientModal','createAppointmentModal','specialTermModal','proposeTimeModal','dayDetailsModal'];
+  for (const id of ids) {
+    const el = document.getElementById(id);
+    if (el && !el.classList.contains('hidden')) {
+      el.classList.add('hidden');
+      untrapFocus(el);
+      break;
+    }
+  }
+}
+window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAnyOpenModal(); });
+
+// --- Button lock helper ---
+async function withButtonLock(btn, work) {
+  if (!btn) return work();
+  const prev = btn.disabled;
+  btn.disabled = true;
+  try { const r = await work(); return r; }
+  finally { btn.disabled = prev; }
+}
+
 
 document.getElementById('manageClientModalBody').addEventListener('click', (event) => {
     const target = event.target;
@@ -76,6 +138,9 @@ function logout() {
 }
 
 function openManageClientModal(clientId) {
+    const __m = document.getElementById('manageClientModal');
+    trapFocus(__m);
+
     const client = state.clients.find(c => c.id === clientId);
     if (client) {
         state.activeModalTab = 'tab-main';
@@ -91,6 +156,9 @@ function openAddClientModal() {
 }
 
 function closeManageClientModal() {
+    const __m = document.getElementById('manageClientModal');
+    untrapFocus(__m);
+
     document.getElementById('manageClientModal').classList.add('hidden');
 }
 
@@ -189,6 +257,9 @@ function openCreateAppointmentFromDetails(dateString) {
 }
 
 function openCreateAppointmentModal(dateString) {
+    const __m = document.getElementById('createAppointmentModal');
+    trapFocus(__m);
+
     const modal = document.getElementById('createAppointmentModal');
     modal.querySelector('#createAppointmentModalTitle').innerText = `Nowa wizyta na dzień ${dateString}`;
     modal.querySelector('#appointmentDateInput').value = dateString;
@@ -197,18 +268,30 @@ function openCreateAppointmentModal(dateString) {
 }
 
 function closeCreateAppointmentModal() {
+    const __m = document.getElementById('createAppointmentModal');
+    untrapFocus(__m);
+
     document.getElementById('createAppointmentModal').classList.add('hidden');
 }
 
 function openSpecialTermModal() {
+    const __m = document.getElementById('specialTermModal');
+    trapFocus(__m);
+
     document.getElementById('specialTermModal').classList.remove('hidden');
 }
 
 function closeSpecialTermModal() {
+    const __m = document.getElementById('specialTermModal');
+    untrapFocus(__m);
+
     document.getElementById('specialTermModal').classList.add('hidden');
 }
 
 function openProposeTimeModal({ requestIndex, appointmentId }) {
+    const __m = document.getElementById('proposeTimeModal');
+    trapFocus(__m);
+
     state.requestToEditIndex = null;
     state.appointmentToEditId = null;
     if (requestIndex !== undefined) {
@@ -222,14 +305,23 @@ function openProposeTimeModal({ requestIndex, appointmentId }) {
 }
 
 function closeProposeTimeModal() {
+    const __m = document.getElementById('proposeTimeModal');
+    untrapFocus(__m);
+
     document.getElementById('proposeTimeModal').classList.add('hidden');
 }
 
 function openDayDetailsModal() {
+    const __m = document.getElementById('dayDetailsModal');
+    trapFocus(__m);
+
     document.getElementById('dayDetailsModal').classList.remove('hidden');
 }
 
 function closeDayDetailsModal() {
+    const __m = document.getElementById('dayDetailsModal');
+    untrapFocus(__m);
+
     document.getElementById('dayDetailsModal').classList.add('hidden');
 }
 
@@ -596,7 +688,34 @@ document.getElementById('dayDetailsModalBody').addEventListener('click', (event)
 document.getElementById('cancelCreateAppointmentBtn').addEventListener('click', closeCreateAppointmentModal);
 document.getElementById('createAppointmentForm').addEventListener('submit', (event) => {
     event.preventDefault();
-    const form = event.target;
+    const btn = event.target.querySelector('button[type="submit"]');
+    withButtonLock(btn, () => {
+        const form = event.target;
+        const date = form.querySelector('#appointmentDateInput').value;
+        const time = form.querySelector('#appointmentTimeInput').value;
+        const clientId = parseInt(form.querySelector('#clientSelect').value, 10);
+        const client = state.clients.find(c => c.id === clientId);
+        if (!client) return;
+
+        if (client.subscription.entriesLeft <= 0) {
+            alert('Ten klient nie ma już dostępnych wejść w karnecie!');
+            return;
+        }
+        if (state.appointments.some(a => a.date === date && a.time === time)) {
+            alert('Termin już zajęty');
+            return;
+        }
+
+        const id = state.appointments.length ? Math.max(...state.appointments.map(a => a.id)) + 1 : 1;
+        const newAppointment = { id, date, time, clientId };
+        state.appointments.push(newAppointment);
+        closeCreateAppointmentModal();
+        render.renderAdminCalendar();
+        render.renderClientsList();
+        showDayDetails(date);
+    });
+});
+    const __btn = event.target.querySelector('button[type=\"submit\"]'); withButtonLock(__btn, () => { const form = event.target;
     const date = form.querySelector('#appointmentDateInput').value;
     const time = form.querySelector('#appointmentTime').value;
     const clientId = parseInt(form.querySelector('#clientSelect').value, 10);
@@ -612,9 +731,9 @@ document.getElementById('createAppointmentForm').addEventListener('submit', (eve
     render.renderAdminCalendar();
     render.renderClientsList();
     showDayDetails(date);
+    });
 });
 
-}
 function setupCalendarListeners() {
     const calendarContainer = document.querySelector('body'); // Listen on the whole body
     calendarContainer.addEventListener('click', (event) => {
@@ -640,6 +759,36 @@ function setupCalendarListeners() {
         }
     });
 }
+// keyboard navigation inside calendar
+document.body.addEventListener('keydown', (e) => {
+  const focused = document.activeElement;
+  if (!focused || !focused.classList.contains('calendar-day')) return;
+  const y = parseInt(focused.dataset.year, 10);
+  const m = parseInt(focused.dataset.month, 10);
+  const d = parseInt(focused.dataset.day, 10);
+  const isAdmin = focused.dataset.isAdmin === 'true';
+  const move = (delta) => {
+    const base = new Date(y, m - 1, d);
+    base.setDate(base.getDate() + delta);
+    const ny = base.getFullYear(), nm = base.getMonth() + 1, nd = base.getDate();
+    const sel = document.querySelector(`.calendar-day[data-year="${ny}"][data-month="${nm}"][data-day="${nd}"]`);
+    if (sel) { sel.focus(); return; }
+    changeMonth(delta > 0 ? 1 : -1, isAdmin);
+    queueMicrotask(() => {
+      const later = document.querySelector(`.calendar-day[data-year="${ny}"][data-month="${nm}"][data-day="${nd}"]`);
+      if (later) later.focus();
+    });
+  };
+  switch (e.key) {
+    case 'ArrowLeft': e.preventDefault(); move(-1); break;
+    case 'ArrowRight': e.preventDefault(); move(+1); break;
+    case 'ArrowUp': e.preventDefault(); move(-7); break;
+    case 'ArrowDown': e.preventDefault(); move(+7); break;
+    case 'Enter':
+    case ' ': e.preventDefault(); showDayDetails(focused.dataset.date); break;
+  }
+});
+
 
 export function setupEventListeners() {
     setupLoginListeners();

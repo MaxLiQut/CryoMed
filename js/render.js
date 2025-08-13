@@ -17,6 +17,14 @@ function syncClientCardHeights() {
         rightCard.style.maxHeight = h + 'px';
     }
 }
+// Simple debounce
+function debounce(fn, ms = 150) {
+  let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+}
+// Debounced resync on resize
+const resyncHeights = debounce(syncClientCardHeights, 150);
+window.addEventListener('resize', resyncHeights);
+
 
 export function renderStatistics() {
     const { stats } = state;

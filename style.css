@@ -265,3 +265,22 @@ body {
 #client-scroll-container { display: block; height: 100%; }
 #client-scroll-container .tab-content.card-scroll-content { height: 100%; overflow-y: auto; }
 #client-scroll-container .tab-content { padding-right: 8px; box-sizing: border-box; }
+
+
+/* Toast notifications */
+.toast {
+  position: fixed; top: 16px; right: 16px;
+  padding: 10px 12px; border-radius: 8px;
+  color: #fff; box-shadow: 0 6px 18px rgba(0,0,0,.2);
+  z-index: 9999; background: #2563eb;
+}
+.toast.success { background: #16a34a; }
+.toast.error   { background: #dc2626; }
+.toast.info    { background: #2563eb; }
+
+/* Focus style for calendar days */
+.calendar-day:focus {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
