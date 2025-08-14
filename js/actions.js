@@ -239,52 +239,6 @@ export function proposeNewTime({ newDate, newTime }) {
     alert('Propozycja zmiany terminu została wysłana do klienta!');
 }
 
-/* ---------- НОВІ ДІЇ ДЛЯ КАЛЕНДАРЯ АДМІНІСТРАТОРА ---------- */
-
-export function adminDeleteAppointment(appointmentId) {
-    const appIndex = state.appointments.findIndex(a => a.id === appointmentId);
-    if (appIndex === -1) return;
-
-    if (confirm('Czy na pewno chcesz usunąć tę wizytę?')) {
-        state.appointments.splice(appIndex, 1);
-        // Re-render the modal with updated info and the main calendar
-        render.renderDayDetailsModal(state.dayForModal);
-        render.renderAdminCalendar();
-        alert('Wizyta została usunięta.');
-    }
-}
-
-export function createAppointment({ clientId, time }) {
-    if (!clientId || !time || !state.dayForModal) {
-        alert('Błąd: Nie można utworzyć wizyty. Brak danych.');
-        return;
-    }
-    const client = state.clients.find(c => c.id === parseInt(clientId));
-    if (!client) {
-        alert('Błąd: Wybrany klient nie istnieje.');
-        return;
-    }
-    if (client.subscription.entriesLeft <= 0) {
-        if (!confirm(`Uwaga: Klient "${client.name}" nie ma dostępnych wejść na karnecie. Czy na pewno chcesz utworzyć wizytę?`)) {
-            return;
-        }
-    }
-
-    state.appointments.push({
-        id: nextId(state.appointments),
-        date: state.dayForModal,
-        time,
-        clientId: parseInt(clientId)
-    });
-
-    client.subscription.entriesLeft--; // Take one entry
-
-    closeAllModals();
-    render.renderAdminCalendar();
-    alert(`Dodano wizytę dla ${client.name} na ${state.dayForModal} o ${time}.`);
-}
-
-
 
 // --- Modal Opening & State Setup ---
 export function openAddClientModal() {
@@ -315,21 +269,6 @@ export function openProposeTimeModal(requestIndex) {
     state.requestToEditIndex = requestIndex;
     state.appointmentToEditId = null;
     openModal('proposeTimeModal');
-}
-
-// --- НОВІ ФУНКЦІЇ ДЛЯ ВІДКРИТТЯ МОДАЛЬНИХ ВІКОН ---
-export function openDayDetailsModal(date) {
-    state.dayForModal = date;
-    render.renderDayDetailsModal(date);
-    openModal('dayDetailsModal');
-}
-
-export function openCreateAppointmentModal() {
-    render.renderClientSelectOptions();
-    // The date is already stored in state.dayForModal
-    const title = document.getElementById('createAppointmentModalTitle');
-    if (title) title.textContent = `Nowa wizyta na dzień ${state.dayForModal}`;
-    openModal('createAppointmentModal');
 }
 
 // --- Calendar ---
