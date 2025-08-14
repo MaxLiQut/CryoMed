@@ -376,11 +376,21 @@ function buildCalendar({ y, m, isAdmin }) {
     const weekdays = ['Nd', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So'];
 
     const nav = `
-    <div class="calendar-nav">
-      <button data-action="change-month" data-direction="-1" data-is-admin="${isAdmin}" class="px-2 py-1 bg-gray-200 rounded">←</button>
-      <div class="font-semibold">${first.toLocaleString('pl-PL', { month: 'long', year: 'numeric' })}</div>
-      <button data-action="change-month" data-direction="1" data-is-admin="${isAdmin}" class="px-2 py-1 bg-gray-200 rounded">→</button>
-    </div>`;
+  <div class="calendar-nav">
+    <button data-action="change-month" data-direction="-1" data-is-admin="${isAdmin}"
+            class="cal-nav-btn" aria-label="Poprzedni miesiąc" title="Poprzedni miesiąc">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M15 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <div class="font-semibold">${first.toLocaleString('pl-PL', { month: 'long', year: 'numeric' })}</div>
+    <button data-action="change-month" data-direction="1" data-is-admin="${isAdmin}"
+            class="cal-nav-btn" aria-label="Następny miesiąc" title="Następny miesiąc">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>`;
 
     const headers = weekdays.map(w => `<div class="calendar-day-header">${w}</div>`).join('');
     const cells = [];

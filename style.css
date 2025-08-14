@@ -281,3 +281,123 @@ body {
     border-color: #374151;
     opacity: 0.7;
 }
+
+/* ---------- Focus ring для всіх інтерактивів ---------- */
+:root {
+    --focus-ring: #6366f1;
+}
+:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+}
+.calendar-day:focus {
+    outline: none;
+} /* щоб не дублювати */
+.calendar-day:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+}
+
+/* Кнопки навігації календаря */
+.cal-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: #e5e7eb;
+    color: #111827;
+}
+.cal-nav-btn:hover {
+    filter: brightness(0.95);
+}
+:root[data-theme='dark'] .cal-nav-btn {
+    background: #0f172a;
+    color: #e5e7eb;
+    border: 1px solid #374151;
+}
+:root[data-theme='dark'] .cal-nav-btn:hover {
+    background: #111827;
+}
+
+/* ---------- Інпути/селекти/текстери ----------- */
+:root[data-theme='dark'] input,
+:root[data-theme='dark'] select,
+:root[data-theme='dark'] textarea {
+    background: #0f172a;
+    border: 1px solid #374151;
+    color: var(--text);
+    caret-color: #e5e7eb;
+}
+:root[data-theme='dark'] input::placeholder,
+:root[data-theme='dark'] textarea::placeholder {
+    color: #9ca3af;
+    opacity: 1; /* вище контраст */
+}
+:root[data-theme='dark'] input:focus,
+:root[data-theme='dark'] select:focus,
+:root[data-theme='dark'] textarea:focus {
+    border-color: var(--focus-ring);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.35);
+    outline: none;
+}
+
+/* ---------- Disabled day (клієнт): підсилити контраст ---------- */
+.calendar-day.disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+    border: 1px dashed #cbd5e1;
+}
+:root[data-theme='dark'] .calendar-day.disabled {
+    background: #0c1326;
+    color: #94a3b8;
+    border-color: #3b4a70;
+    opacity: 0.9;
+}
+.calendar-day.disabled .day-number {
+    color: inherit;
+}
+
+/* ---------- Scrollbar (акуратний) ---------- */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #6b7280 transparent;
+}
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-thumb {
+    background: #6b7280;
+    border-radius: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+:root[data-theme='dark'] ::-webkit-scrollbar-thumb {
+    background: #4b5563;
+}
+
+.calendar-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.calendar-legend .swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    display: inline-block;
+}
+.calendar-legend .swatch--available {
+    background: #10b981;
+}
+.calendar-legend .swatch--disabled {
+    background: #d1d5db;
+    border: 1px dashed #9ca3af;
+}
+:root[data-theme='dark'] .calendar-legend .swatch--disabled {
+    background: #0c1326;
+    border-color: #3b4a70;
+}
