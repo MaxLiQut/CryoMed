@@ -1,15 +1,46 @@
-/* Base */
+/* =========================
+   TOKENS
+   ========================= */
+:root {
+    --font: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    --focus-ring: #6366f1;
+    /* light tokens (implicit via Tailwind-like colors) */
+}
+
+:root[data-theme='dark'] {
+    --bg: #121212; /* surface-a0 */
+    --surface-1: #21211f; /* tonal-a0 */
+    --surface-2: #282828; /* surface-a10 */
+    --text: #f2f2f2;
+    --muted: #bdbdbd;
+    --border: #363634;
+    --focus-ring: #c7bfa7; /* palette focus */
+}
+
+/* =========================
+   BASE
+   ========================= */
 * {
     box-sizing: border-box;
 }
 html,
 body {
     height: 100%;
-    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    font-family: var(--font);
 }
 .hidden {
     display: none !important;
 }
+
+/* Focus (keyboard) */
+:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+}
+
+/* =========================
+   COMPONENTS
+   ========================= */
 
 /* Cards */
 .dashboard-card {
@@ -22,7 +53,7 @@ body {
     padding-right: 8px;
 }
 
-/* Calendar */
+/* Calendar shell */
 .custom-calendar {
     border: 1px solid #e5e7eb;
     border-radius: 12px;
@@ -46,6 +77,8 @@ body {
     text-align: center;
     padding-bottom: 6px;
 }
+
+/* Calendar day cells */
 .calendar-day {
     background: #f9fafb;
     border: 1px solid #e5e7eb;
@@ -71,12 +104,32 @@ body {
     background: #10b981;
     color: #fff;
 }
+
+/* Legend */
 .calendar-legend {
     display: flex;
     gap: 12px;
     font-size: 12px;
     color: #6b7280;
     margin-top: 10px;
+}
+.calendar-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.calendar-legend .swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    display: inline-block;
+}
+.calendar-legend .swatch--available {
+    background: #10b981;
+}
+.calendar-legend .swatch--disabled {
+    background: #d1d5db;
+    border: 1px dashed #9ca3af;
 }
 
 /* Time slots */
@@ -129,12 +182,14 @@ body {
 }
 .tab-content {
     display: none;
+    height: 100%;
 }
 .tab-content.active {
     display: block;
+    height: 100%;
 }
 
-/* Equal heights (client dashboard) */
+/* Client equal heights + scroll */
 #client-info-container {
     align-items: start;
 }
@@ -151,19 +206,18 @@ body {
     min-height: 0;
     overflow: hidden;
 }
+#client-scroll-container {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
 .card-scroll-content {
     flex: 1 1 auto;
     min-height: 0;
     height: 100%;
     overflow-y: auto;
-}
-
-#client-scroll-container {
-    flex: 1 1 auto;
-    min-height: 0; /* дозволяє вкладеним блокам стискатись */
-    height: 100%; /* фіксує висоту для появи внутрішнього скролу */
-    display: flex;
-    flex-direction: column;
 }
 
 /* Theme toggle */
@@ -207,18 +261,59 @@ body {
     z-index: 60;
 }
 
-/* Dark theme tokens */
-:root[data-theme='dark'] {
-    --bg: #0b1220;
-    --surface-1: #111a2f;
-    --surface-2: #0f172a;
-    --text: #e6ebf5;
-    --muted: #a7b3cc;
-    --border: #24304f;
+/* Calendar navigation buttons (SVG arrows) */
+.cal-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: #e5e7eb;
+    color: #111827;
 }
+.cal-nav-btn:hover {
+    filter: brightness(0.95);
+}
+
+/* Unavailable days (client) */
+.calendar-day.disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+    border: 1px dashed #cbd5e1;
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+.calendar-day.disabled .day-number {
+    color: inherit;
+}
+
+/* Scrollbar (Chromium/Firefox) */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #6b7280 transparent;
+}
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-thumb {
+    background: #6b7280;
+    border-radius: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* =========================
+   DARK THEME — GLOBAL OVERRIDES
+   ========================= */
 :root[data-theme='dark'] body {
     background: var(--bg) !important;
     color: var(--text) !important;
+}
+:root[data-theme='dark'] header {
+    background: var(--surface-2) !important;
 }
 :root[data-theme='dark'] .dashboard-card,
 :root[data-theme='dark'] .custom-calendar,
@@ -226,9 +321,6 @@ body {
     background: var(--surface-1) !important;
     color: var(--text) !important;
     border: 1px solid var(--border);
-}
-:root[data-theme='dark'] header {
-    background: var(--surface-2) !important;
 }
 :root[data-theme='dark'] .calendar-day {
     background: var(--surface-2) !important;
@@ -246,72 +338,23 @@ body {
 :root[data-theme='dark'] .theme-toggle .dot {
     background: #e5e7eb;
 }
+:root[data-theme='dark'] .calendar-day.disabled {
+    background: #0c1326;
+    color: #94a3b8;
+    border-color: #3b4a70;
+}
+:root[data-theme='dark'] ::-webkit-scrollbar-thumb {
+    background: #4b5563;
+}
 
-/* Keep contrast for brand buttons in dark */
+/* Брендові кнопки — зберігаємо білий текст у dark */
 :root[data-theme='dark'] .bg-indigo-600,
 :root[data-theme='dark'] .bg-blue-600,
 :root[data-theme='dark'] .bg-green-600 {
     color: #fff !important;
 }
 
-.tab-content {
-    display: none;
-    height: 100%;
-}
-.tab-content.active {
-    display: block;
-    height: 100%;
-}
-
-/* Unavailable days (client calendar) */
-.calendar-day.disabled {
-    background: #f3f4f6;
-    color: #9ca3af;
-    border: 1px dashed #d1d5db;
-    cursor: not-allowed;
-    opacity: 0.75;
-}
-.calendar-day.disabled .day-number {
-    color: #9ca3af;
-}
-/* Темна тема */
-:root[data-theme='dark'] .calendar-day.disabled {
-    background: #111827;
-    color: #9ca3af;
-    border-color: #374151;
-    opacity: 0.7;
-}
-
-/* ---------- Focus ring для всіх інтерактивів ---------- */
-:root {
-    --focus-ring: #6366f1;
-}
-:focus-visible {
-    outline: 2px solid var(--focus-ring);
-    outline-offset: 2px;
-}
-.calendar-day:focus {
-    outline: none;
-} /* щоб не дублювати */
-.calendar-day:focus-visible {
-    outline: 2px solid var(--focus-ring);
-    outline-offset: 2px;
-}
-
-/* Кнопки навігації календаря */
-.cal-nav-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-    background: #e5e7eb;
-    color: #111827;
-}
-.cal-nav-btn:hover {
-    filter: brightness(0.95);
-}
+/* Кнопки навігації календаря у dark */
 :root[data-theme='dark'] .cal-nav-btn {
     background: #0f172a;
     color: #e5e7eb;
@@ -321,7 +364,7 @@ body {
     background: #111827;
 }
 
-/* ---------- Інпути/селекти/текстери ----------- */
+/* Inputs/select/textarea у dark */
 :root[data-theme='dark'] input,
 :root[data-theme='dark'] select,
 :root[data-theme='dark'] textarea {
@@ -333,7 +376,7 @@ body {
 :root[data-theme='dark'] input::placeholder,
 :root[data-theme='dark'] textarea::placeholder {
     color: #9ca3af;
-    opacity: 1; /* вище контраст */
+    opacity: 1;
 }
 :root[data-theme='dark'] input:focus,
 :root[data-theme='dark'] select:focus,
@@ -343,61 +386,137 @@ body {
     outline: none;
 }
 
-/* ---------- Disabled day (клієнт): підсилити контраст ---------- */
-.calendar-day.disabled {
-    background: #f3f4f6;
-    color: #9ca3af;
-    border: 1px dashed #cbd5e1;
-}
-:root[data-theme='dark'] .calendar-day.disabled {
-    background: #0c1326;
-    color: #94a3b8;
-    border-color: #3b4a70;
-    opacity: 0.9;
-}
-.calendar-day.disabled .day-number {
-    color: inherit;
+/* =========================
+   DARK THEME — COMPONENT-SPECIFIC FIXES
+   ========================= */
+
+/* Модалі/картки: не дозволяємо класам text-gray-900/800 «глушити» темні токени */
+:root[data-theme='dark'] .modal-content .text-gray-900,
+:root[data-theme='dark'] .dashboard-card .text-gray-900,
+:root[data-theme='dark'] .dashboard-card .text-gray-800 {
+    color: var(--text) !important;
 }
 
-/* ---------- Scrollbar (акуратний) ---------- */
-* {
-    scrollbar-width: thin;
-    scrollbar-color: #6b7280 transparent;
+/* Manage Client modal: підписи/бордери/хедери історії */
+:root[data-theme='dark'] #manageClientModal .text-gray-700,
+:root[data-theme='dark'] #manageClientModal .text-gray-600 {
+    color: #cbd5e1 !important;
 }
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+:root[data-theme='dark'] #manageClientModal .text-gray-500 {
+    color: var(--muted) !important;
 }
-::-webkit-scrollbar-thumb {
-    background: #6b7280;
-    border-radius: 8px;
+:root[data-theme='dark'] #manageClientModal .border-gray-300 {
+    border-color: var(--border) !important;
 }
-::-webkit-scrollbar-track {
-    background: transparent;
+:root[data-theme='dark'] #manageClientModal .text-xs.font-bold.text-gray-500 {
+    color: #d1d5db !important;
 }
-:root[data-theme='dark'] ::-webkit-scrollbar-thumb {
-    background: #4b5563;
+:root[data-theme='dark'] #manageClientModal .hover\:bg-gray-100:hover {
+    background: rgba(255, 255, 255, 0.04) !important;
 }
 
-.calendar-legend span {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+/* Капсула «Moje zaplanowane wizyty» */
+:root[data-theme='dark'] #appointments-list .bg-gray-50 {
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text) !important;
 }
-.calendar-legend .swatch {
-    width: 12px;
-    height: 12px;
-    border-radius: 3px;
-    display: inline-block;
+:root[data-theme='dark'] #appointments-list .text-gray-600 {
+    color: #cbd5e1 !important;
 }
-.calendar-legend .swatch--available {
+
+/* Екран логіну: текст на білому боксі — темний */
+:root[data-theme='dark'] #loginScreen .bg-white {
+    color: #111827 !important;
+}
+
+/* Кнопка «Zarejestruj nowego klienta» — контраст у dark */
+:root[data-theme='dark'] #addClientBtn {
+    background: #e5e7eb !important;
+    color: #111827 !important;
+    border: 1px solid #cbd5e1;
+}
+:root[data-theme='dark'] #addClientBtn:hover {
+    background: #d1d5db !important;
+}
+:root[data-theme='dark'] #addClientBtn:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+}
+
+/* === DARK OVERRIDES (mapped to existing class names) === */
+:root[data-theme='dark'] body {
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* Cards and panels */
+:root[data-theme='dark'] .dashboard-card {
+    background: var(--surface-1);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+/* Tabs */
+:root[data-theme='dark'] .tab-button {
+    color: var(--muted);
+}
+:root[data-theme='dark'] .tab-button.active {
+    color: #dad4c4; /* primary-a30 */
+    border-bottom-color: #dad4c4;
+}
+
+/* Links like "Zarządzaj" and actions */
+:root[data-theme='dark'] a,
+:root[data-theme='dark'] .manage-btn,
+:root[data-theme='dark'] .change-appointment-btn {
+    color: #dad4c4; /* primary-a30 */
+}
+:root[data-theme='dark'] a:hover,
+:root[data-theme='dark'] .manage-btn:hover,
+:root[data-theme='dark'] .change-appointment-btn:hover {
+    text-decoration: underline;
+}
+
+/* Calendar shells */
+:root[data-theme='dark'] .custom-calendar {
+    background: var(--surface-1);
+    border-color: var(--border);
+}
+:root[data-theme='dark'] .calendar-day-header {
+    color: var(--muted);
+}
+:root[data-theme='dark'] .calendar-day {
+    background: var(--surface-2);
+    border-color: var(--border);
+    color: var(--text);
+}
+:root[data-theme='dark'] .calendar-day .day-number {
+    color: var(--text);
+}
+:root[data-theme='dark'] .calendar-legend {
+    color: var(--muted);
+}
+:root[data-theme='dark'] .swatch {
+    border-color: var(--border);
+}
+:root[data-theme='dark'] .swatch--available {
     background: #10b981;
+} /* keep success */
+:root[data-theme='dark'] .swatch--disabled {
+    background: #6b7280;
 }
-.calendar-legend .swatch--disabled {
-    background: #d1d5db;
-    border: 1px dashed #9ca3af;
+
+/* Inputs */
+:root[data-theme='dark'] input,
+:root[data-theme='dark'] select,
+:root[data-theme='dark'] textarea {
+    background: var(--bg);
+    color: var(--text);
+    border-color: var(--border);
 }
-:root[data-theme='dark'] .calendar-legend .swatch--disabled {
-    background: #0c1326;
-    border-color: #3b4a70;
+
+/* Toasts / subtle borders */
+:root[data-theme='dark'] .border-subtle {
+    border-color: var(--border);
 }
