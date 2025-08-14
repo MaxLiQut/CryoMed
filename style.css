@@ -1,378 +1,244 @@
-/* Основний шрифт для всього документа */
+/* Base */
+* {
+    box-sizing: border-box;
+}
+html,
 body {
-    font-family: 'Inter', sans-serif;
-}
-
-/* Ефект "підняття" для карток на панелі */
-.dashboard-card {
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.dashboard-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-}
-
-/* Стилізація модального вікна */
-.modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 50;
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+.hidden {
+    display: none !important;
 }
 
-.modal-content {
-    background-color: white;
-    padding: 2rem;
-    border-radius: 0.75rem;
-    width: 90%;
-    max-width: 500px;
+/* Cards */
+.dashboard-card {
+    background: #fff;
+    border-radius: 12px;
 }
-
-/* Стилізація смуги прокрутки */
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-
-/* Стилі для власного календаря */
-.custom-calendar {
-    background: white;
-    border-radius: 8px;
-    padding: 16px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.calendar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-}
-
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
-}
-
-.calendar-day-header {
-    text-align: center;
-    font-weight: 600;
-    color: #6b7280;
-    font-size: 14px;
-    padding: 8px;
-}
-
-.calendar-day {
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 14px;
-}
-
-.calendar-day.available {
-    background: #f3f4f6;
-    color: #1f2937;
-}
-
-.calendar-day.available:hover {
-    background: #10b981;
-    color: white;
-}
-
-.calendar-day.selected {
-    background: #10b981;
-    color: white;
-    font-weight: 600;
-}
-
-.calendar-day.disabled {
-    color: #d1d5db;
-    cursor: not-allowed;
-}
-
-.calendar-day.today {
-    border: 2px solid #10b981;
-}
-
-.calendar-nav-btn {
-    background: none;
-    border: none;
-    padding: 8px 12px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background 0.2s;
-}
-
-.calendar-nav-btn:hover {
-    background: #f3f4f6;
-}
-
-.time-slot {
-    padding: 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    background: white;
-}
-
-.time-slot:hover:not(.booked) {
-    background: #10b981;
-    color: white;
-    border-color: #10b981;
-}
-
-.time-slot.booked {
-    background: #fee2e2;
-    color: #dc2626;
-    cursor: not-allowed;
-}
-
-.admin-calendar-grid {
-    grid-auto-rows: minmax(120px, auto);
-}
-
-.admin-calendar-day {
-    border: 1px solid #e5e7eb;
-    padding: 4px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.admin-calendar-day:hover {
-    background-color: #f9fafb;
-}
-
-.admin-calendar-day .day-number {
-    font-weight: 600;
-    color: #6b7280;
-    text-align: right;
-    margin-bottom: 4px;
-}
-
-.admin-calendar-appointment {
-    background-color: #dbeafe;
-    color: #1e40af;
-    padding: 2px 4px;
-    border-radius: 4px;
-    margin-bottom: 2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.admin-calendar-more-link {
-    font-size: 11px;
-    text-align: center;
-    color: #4f46e5;
-    cursor: pointer;
-    font-weight: 600;
-    margin-top: 4px;
-}
-
-.admin-calendar-more-link:hover {
-    text-decoration: underline;
-}
-
-.tab-container {
-    display: flex;
-    border-bottom: 2px solid #e5e7eb;
-    margin-bottom: 1.5rem;
-}
-
-.tab-button {
-    padding: 0.75rem 1.25rem;
-    cursor: pointer;
-    background-color: transparent;
-    border: none;
-    color: #6b7280;
-    font-weight: 500;
-    font-size: 0.875rem;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -2px;
-    transition: all 0.2s;
-}
-
-.tab-button:hover {
-    color: #111827;
-}
-
-.tab-button.active {
-    color: #4f46e5;
-    border-bottom-color: #4f46e5;
-}
-
-.tab-content {
-    display: none;
-}
-
-.tab-content.active {
-    display: block;
-}
-
-/* === НОВІ, СПРОЩЕНІ КЛАСИ ДЛЯ СКРОЛУ === */
-
-/* Високий список для панелі адміністратора */
 .scroll-list-admin {
-    max-height: 500px; /* Можна налаштувати */
+    max-height: 500px;
     overflow-y: auto;
     padding-right: 8px;
 }
 
-.equal-height-card {
+/* Calendar */
+.custom-calendar {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+    background: #fff;
+}
+.calendar-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+.calendar-grid {
     display: grid;
-    grid-template-rows: auto 1fr;
-    height: 100%;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+}
+.calendar-day-header {
+    font-size: 12px;
+    color: #6b7280;
+    text-align: center;
+    padding-bottom: 6px;
+}
+.calendar-day {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 8px;
+    min-height: 72px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 6px;
+    flex-direction: column;
+}
+.calendar-day .day-number {
+    font-weight: 600;
+    font-size: 12px;
+    color: #374151;
+}
+.calendar-day.available {
+    cursor: pointer;
+}
+.calendar-day.available:hover,
+.calendar-day.selected {
+    background: #10b981;
+    color: #fff;
+}
+.calendar-legend {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 10px;
 }
 
+/* Time slots */
+.time-slot {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    padding: 8px 10px;
+    border-radius: 8px;
+    text-align: left;
+}
+.time-slot.booked {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Modals */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 50;
+    padding: 16px;
+}
+.modal-content {
+    width: 100%;
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px;
+    max-height: 90vh;
+    overflow: auto;
+}
+
+/* Tabs */
+.tab-container {
+    display: flex;
+    border-bottom: 2px solid #e5e7eb;
+    margin-bottom: 1rem;
+}
+.tab-button {
+    padding: 0.7rem 1rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #6b7280;
+    border-bottom: 2px solid transparent;
+}
+.tab-button.active {
+    color: #4f46e5;
+    border-bottom-color: #4f46e5;
+}
+.tab-content {
+    display: none;
+}
+.tab-content.active {
+    display: block;
+}
+
+/* Equal heights (client dashboard) */
+#client-info-container {
+    align-items: start;
+}
+#client-info-container .dashboard-card {
+    display: flex;
+    flex-direction: column;
+}
+#client-info-container .dashboard-card .tab-container {
+    flex: 0 0 auto;
+}
+#client-info-container .dashboard-card .flex-grow {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
 .card-scroll-content {
     overflow-y: auto;
     min-height: 0;
 }
 
-
-/* Keep strong brand colors for utility-colored buttons in dark theme */
-:root[data-theme="dark"] .bg-indigo-600 { background: #7c3aed !important; color:#fff !important; border-color: transparent !important; }
-:root[data-theme="dark"] .bg-indigo-600:hover { background:#6d28d9 !important; }
-:root[data-theme="dark"] .bg-blue-600 { background: #2563eb !important; color:#fff !important; border-color: transparent !important; }
-:root[data-theme="dark"] .bg-blue-600:hover { background:#1d4ed8 !important; }
-:root[data-theme="dark"] .bg-green-600 { background: #16a34a !important; color:#fff !important; border-color: transparent !important; }
-:root[data-theme="dark"] .bg-green-600:hover { background:#15803d !important; }
-
-:root[data-theme="dark"] .text-gray-400 { color:#aab3c5 !important; }
-
-
-/* Client panel equal-height + inner scroll */
-#client-info-container { align-items: start; }
-#client-info-container .dashboard-card { display: flex; flex-direction: column; }
-#client-info-container .dashboard-card .tab-container { flex: 0 0 auto; }
-#client-info-container .dashboard-card .flex-grow { flex: 1 1 auto; min-height: 0; overflow: hidden; }
-#client-info-container .dashboard-card .card-scroll-content { height: 100%; overflow-y: auto; }
-
-
-/* Theme toggle pill */
+/* Theme toggle */
 .theme-toggle {
-  width: 46px; height: 26px; border-radius: 999px;
-  border: 1px solid rgba(2,6,23,.12);
-  display: inline-flex; align-items: center; position: relative;
-  background:#fff; cursor:pointer; padding:0;
+    width: 46px;
+    height: 26px;
+    border-radius: 999px;
+    border: 1px solid rgba(2, 6, 23, 0.12);
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    background: #fff;
+    cursor: pointer;
+    padding: 0;
 }
 .theme-toggle .dot {
-  position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%;
-  background:#6366f1; transition: transform .2s ease;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #6366f1;
+    transition: transform 0.2s ease;
 }
-.theme-toggle.active .dot { transform: translateX(20px); }
-:root[data-theme="dark"] .theme-toggle { background:#0f152b; border-color: rgba(255,255,255,.14); }
-:root[data-theme="dark"] .theme-toggle .dot { background:#e5e7eb; }
-
-
-/* === Login buttons: force white text in dark theme (only these two) === */
-:root[data-theme="dark"] #loginAdminBtn,
-:root[data-theme="dark"] #loginClientBtn {
-  color: #ffffff !important;
-}
-
-
-/* ===== DARK THEME — consolidated fixes ===== */
-
-/* Color tokens */
-:root[data-theme="dark"] {
-  --bg:#0b1220;
-  --surface-1:#111a2f;
-  --surface-2:#0f172a;
-  --surface-3:#18223f;
-  --border:#24304f;
-  --text:#e6ebf5;
-  --muted:#a7b3cc;
+.theme-toggle.active .dot {
+    transform: translateX(20px);
 }
 
-/* Page + cards */
-:root[data-theme="dark"] body { background-color: var(--bg) !important; color: var(--text) !important; }
-:root[data-theme="dark"] .dashboard-card { background-color: var(--surface-1) !important; box-shadow: 0 0 0 1px rgba(36,48,79,.55) inset, 0 10px 20px rgba(0,0,0,.35) !important; }
-:root[data-theme="dark"] header { background-color: var(--surface-2) !important; }
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #111827;
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    z-index: 60;
+}
 
-/* --- FINAL text model --- */
-:root[data-theme="dark"] .text-black,
-:root[data-theme="dark"] .text-gray-900,
-:root[data-theme="dark"] .text-gray-800,
-:root[data-theme="dark"] .text-gray-700 { color: var(--text) !important; }
+/* Dark theme tokens */
+:root[data-theme='dark'] {
+    --bg: #0b1220;
+    --surface-1: #111a2f;
+    --surface-2: #0f172a;
+    --text: #e6ebf5;
+    --muted: #a7b3cc;
+    --border: #24304f;
+}
+:root[data-theme='dark'] body {
+    background: var(--bg) !important;
+    color: var(--text) !important;
+}
+:root[data-theme='dark'] .dashboard-card,
+:root[data-theme='dark'] .custom-calendar,
+:root[data-theme='dark'] .modal-content {
+    background: var(--surface-1) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border);
+}
+:root[data-theme='dark'] header {
+    background: var(--surface-2) !important;
+}
+:root[data-theme='dark'] .calendar-day {
+    background: var(--surface-2) !important;
+    border-color: var(--border);
+}
+:root[data-theme='dark'] .calendar-day.available:hover,
+:root[data-theme='dark'] .calendar-day.selected {
+    background: #10b981 !important;
+    color: #fff !important;
+}
+:root[data-theme='dark'] .theme-toggle {
+    background: #0f152b;
+    border-color: rgba(255, 255, 255, 0.14);
+}
+:root[data-theme='dark'] .theme-toggle .dot {
+    background: #e5e7eb;
+}
 
-/* Exception only when the element itself is a light surface */
-:root[data-theme="dark"] .bg-white.text-black,
-:root[data-theme="dark"] .bg-white.text-gray-900,
-:root[data-theme="dark"] .bg-white.text-gray-800,
-:root[data-theme="dark"] .bg-white.text-gray-700,
-:root[data-theme="dark"] .bg-gray-50.text-black,
-:root[data-theme="dark"] .bg-gray-50.text-gray-900,
-:root[data-theme="dark"] .bg-gray-50.text-gray-800,
-:root[data-theme="dark"] .bg-gray-50.text-gray-700,
-:root[data-theme="dark"] .bg-gray-100.text-black,
-:root[data-theme="dark"] .bg-gray-100.text-gray-900,
-:root[data-theme="dark"] .bg-gray-100.text-gray-800,
-:root[data-theme="dark"] .bg-gray-100.text-gray-700,
-:root[data-theme="dark"] .bg-gray-200.text-black,
-:root[data-theme="dark"] .bg-gray-200.text-gray-900,
-:root[data-theme="dark"] .bg-gray-200.text-gray-800,
-:root[data-theme="dark"] .bg-gray-200.text-gray-700,
-:root[data-theme="dark"] .bg-gray-300.text-black,
-:root[data-theme="dark"] .bg-gray-300.text-gray-900,
-:root[data-theme="dark"] .bg-gray-300.text-gray-800,
-:root[data-theme="dark"] .bg-gray-300.text-gray-700 { color:#111827 !important; }
-
-/* Buttons: brand colors readable */
-:root[data-theme="dark"] button[class*="bg-indigo-"],
-:root[data-theme="dark"] a[class*="bg-indigo-"],
-:root[data-theme="dark"] [role="button"][class*="bg-indigo-"],
-:root[data-theme="dark"] button[class*="bg-purple-"],
-:root[data-theme="dark"] a[class*="bg-purple-"],
-:root[data-theme="dark"] [role="button"][class*="bg-purple-"],
-:root[data-theme="dark"] button[class*="bg-green-"],
-:root[data-theme="dark"] a[class*="bg-green-"],
-:root[data-theme="dark"] [role="button"][class*="bg-green-"] { color:#fff !important; }
-
-/* White/light buttons keep dark text */
-:root[data-theme="dark"] button.bg-white,
-:root[data-theme="dark"] [role="button"].bg-white,
-:root[data-theme="dark"] button.bg-gray-50,
-:root[data-theme="dark"] button.bg-gray-100,
-:root[data-theme="dark"] button.bg-gray-200,
-:root[data-theme="dark"] button.bg-gray-300 { color:#111827 !important; }
-
-/* Modals */
-:root[data-theme="dark"] .modal-backdrop { background: rgba(8,12,24,.7) !important; }
-:root[data-theme="dark"] .modal-content { background: var(--surface-1) !important; color: var(--text) !important; box-shadow: 0 20px 50px rgba(0,0,0,.6) !important; border:1px solid var(--border) !important; }
-
-/* Calendar (client/admin) */
-:root[data-theme="dark"] .custom-calendar { background: var(--surface-1) !important; border:1px solid var(--border) !important; color: var(--text) !important; }
-:root[data-theme="dark"] .calendar-day-header { color: var(--muted) !important; }
-:root[data-theme="dark"] .calendar-day { color: var(--text) !important; }
-:root[data-theme="dark"] .calendar-day.available { background: var(--surface-2) !important; }
-:root[data-theme="dark"] .calendar-day.available:hover,
-:root[data-theme="dark"] .calendar-day.selected { background:#10b981 !important; color:#fff !important; }
-
-/* Login buttons only: force white text */
-:root[data-theme="dark"] #loginAdminBtn,
-:root[data-theme="dark"] #loginClientBtn { color:#fff !important; }
+/* Keep contrast for brand buttons in dark */
+:root[data-theme='dark'] .bg-indigo-600,
+:root[data-theme='dark'] .bg-blue-600,
+:root[data-theme='dark'] .bg-green-600 {
+    color: #fff !important;
+}
