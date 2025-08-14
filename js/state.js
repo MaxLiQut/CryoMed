@@ -1,9 +1,14 @@
-// Глобальний стан (простий in-memory store)
+import { STATUS } from './constants.js';
+
+// Global state (simple in-memory store)
 export let state = {
+    // UI State
+    view: 'login', // 'login', 'admin', 'client'
     clientDashboardTab: 'history',
     activeModalTab: 'tab-main',
-    currentClientId: 1,
+    currentClientId: 1, // Simulates logged-in client
 
+    // Data
     clients: [
         {
             id: 1,
@@ -25,23 +30,23 @@ export let state = {
 
     appointments: [{ id: 1, date: '2025-08-22', time: '19:00', clientId: 1 }],
 
+    requests: [
+        { from: 'Maria Nowak', clientId: 2, type: 'Termin Specjalny', details: 'Prośba o wizytę: WT 11:00', status: STATUS.PENDING_ADMIN },
+        { from: 'Jan Kowalski', clientId: 1, type: 'Akceptacja', details: 'Zaakceptował Twoją propozycję na PT 19:00', status: STATUS.CONFIRMED }
+    ],
+
+    // Admin view specific state
+    stats: { total: 50, active: 35, expired: 15 },
+    filters: { searchQuery: '', filterBy: 'all' },
+
+    // Temporary state for modals/forms
+    clientToManageId: null,
+    clientToDeleteId: null,
     appointmentToChangeId: null,
     appointmentToEditId: null,
     requestToEditIndex: null,
 
-    requests: [
-        { from: 'Maria Nowak', clientId: 2, type: 'Termin Specjalny', details: 'Prośba o wizytę: WT 11:00', status: 'pending_admin_approval' },
-        { from: 'Jan Kowalski', clientId: 1, type: 'Akceptacja', details: 'Zaakceptował Twoją propozycję na PT 19:00', status: 'confirmed' }
-    ],
-
-    stats: { total: 50, active: 35, expired: 15 },
-
-    clientToDeleteId: null,
-    filters: { searchQuery: '', filterBy: 'all' },
-
-    // Розклад за днями тижня (0=Nd ... 6=Sb)
-    schedule: { 1: ['19:00'], 4: ['19:00'], 5: ['19:00'], 0: ['09:00'] },
-    bookedSlots: { '2025-08-08': ['19:00'] },
-
+    // Schedule and calendar state
+    schedule: { 1: ['19:00'], 4: ['19:00'], 5: ['19:00'], 0: ['09:00'] }, // 0=Sun..6=Sat
     calendar: { currentDate: new Date(), selectedDate: null }
 };

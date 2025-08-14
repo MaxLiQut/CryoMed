@@ -12,10 +12,8 @@
 
 <body class="bg-gray-100 text-gray-800">
 
-    <!-- Toast (глобальні повідомлення) -->
     <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
-    <!-- Login -->
     <div id="loginScreen" class="flex items-center justify-center min-h-screen">
         <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
             <h1 class="text-2xl font-bold text-center">Logowanie do systemu</h1>
@@ -32,7 +30,6 @@
         </div>
     </div>
 
-    <!-- Admin -->
     <div id="adminDashboard" class="hidden">
         <header class="bg-white shadow-md">
             <div class="container mx-auto px-6 py-4 flex justify-between items-center">
@@ -49,7 +46,6 @@
             <div id="stats-container" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6"></div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                <!-- Klienci -->
                 <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg dashboard-card">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-lg font-semibold">Lista klientów</h2>
@@ -70,14 +66,12 @@
                     </button>
                 </div>
 
-                <!-- Wnioski -->
                 <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card">
                     <h2 class="text-lg font-semibold mb-4">Wnioski od klientów</h2>
                     <div id="requests-container" class="space-y-3 scroll-list-admin"></div>
                 </div>
             </div>
 
-            <!-- Kalendarz адміну -->
             <div class="mt-6 bg-white p-6 rounded-xl shadow-lg dashboard-card">
                 <h2 class="text-lg font-semibold mb-4">Kalendarz wizyt</h2>
                 <div id="admin-calendar-container"></div>
@@ -85,7 +79,6 @@
         </main>
     </div>
 
-    <!-- Client -->
     <div id="clientDashboard" class="hidden">
         <header class="bg-white shadow-md">
             <div class="container mx-auto px-6 py-4 flex justify-between items-center">
@@ -129,13 +122,12 @@
         </main>
     </div>
 
-    <!-- Modal: Manage Client -->
     <div id="manageClientModal" class="modal-backdrop hidden flex justify-center items-center" aria-modal="true"
         role="dialog">
         <div class="modal-content max-w-2xl">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-medium leading-6 text-gray-900" id="manageClientModalTitle"></h3>
-                <button id="closeManageClientModalBtn" type="button" class="text-gray-400 hover:text-gray-600"
+                <button type="button" class="text-gray-400 hover:text-gray-600" data-action="close-modal"
                     aria-label="Zamknij">
                     <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -148,7 +140,6 @@
         </div>
     </div>
 
-    <!-- Modal: Delete confirm -->
     <div id="deleteConfirmModal" class="modal-backdrop hidden flex justify-center items-center" aria-modal="true"
         role="dialog">
         <div class="modal-content max-w-md">
@@ -157,7 +148,7 @@
                 <p class="text-sm text-gray-500" id="deleteConfirmText"></p>
             </div>
             <div class="mt-4 flex justify-end space-x-3">
-                <button id="cancelDeleteBtn" type="button"
+                <button type="button" data-action="close-modal"
                     class="bg-white py-2 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">Anuluj</button>
                 <button id="confirmDeleteBtn" type="button"
                     class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700">Usuń</button>
@@ -165,7 +156,6 @@
         </div>
     </div>
 
-    <!-- Modal: Request special term -->
     <div id="specialTermModal" class="modal-backdrop hidden flex justify-center items-center" aria-modal="true"
         role="dialog">
         <div class="modal-content max-w-md">
@@ -182,7 +172,7 @@
                         class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md" />
                 </div>
                 <div class="flex justify-end space-x-3 pt-2">
-                    <button type="button" id="cancelSpecialTermBtn"
+                    <button type="button" data-action="close-modal"
                         class="bg-white py-2 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">Anuluj</button>
                     <button type="submit"
                         class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">Wyślij
@@ -192,7 +182,6 @@
         </div>
     </div>
 
-    <!-- Modal: Propose time (admin / reschedule) -->
     <div id="proposeTimeModal" class="modal-backdrop hidden flex justify-center items-center" aria-modal="true"
         role="dialog">
         <div class="modal-content max-w-md">
@@ -210,7 +199,7 @@
                         class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md" />
                 </div>
                 <div class="flex justify-end space-x-3 pt-2">
-                    <button type="button" id="cancelProposeTimeBtn"
+                    <button type="button" data-action="close-modal"
                         class="bg-white py-2 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">Anuluj</button>
                     <button type="submit"
                         class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">Wyślij
@@ -220,13 +209,12 @@
         </div>
     </div>
 
-    <!-- Modal: Appointments of a day (admin) -->
     <div id="dayDetailsModal" class="modal-backdrop hidden flex justify-center items-center" aria-modal="true"
         role="dialog">
         <div class="modal-content max-w-lg">
             <div class="flex justify-between items-center mb-4">
                 <h3 id="dayDetailsModalTitle" class="text-lg font-medium leading-6 text-gray-900">Wizyty</h3>
-                <button id="closeDayDetailsModalBtn" type="button" class="text-gray-400 hover:text-gray-600"
+                <button type="button" class="text-gray-400 hover:text-gray-600" data-action="close-modal"
                     aria-label="Zamknij">
                     <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -239,7 +227,6 @@
         </div>
     </div>
 
-    <!-- Modal: Create appointment (admin, quick add) -->
     <div id="createAppointmentModal" class="modal-backdrop hidden flex justify-center items-center" aria-modal="true"
         role="dialog">
         <div class="modal-content max-w-md">
@@ -258,7 +245,7 @@
                         class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md" />
                 </div>
                 <div class="flex justify-end space-x-3 pt-2">
-                    <button type="button" id="cancelCreateAppointmentBtn"
+                    <button type="button" data-action="close-modal"
                         class="bg-white py-2 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">Anuluj</button>
                     <button type="submit"
                         class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
