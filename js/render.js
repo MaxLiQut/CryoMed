@@ -322,6 +322,11 @@ export function renderCalendar() {
     const y = date.getFullYear(), m = date.getMonth();
 
     cont.innerHTML = buildCalendar({ y, m, isAdmin: false });
+    if (state.calendar.selectedDate && !hasFreeSlots(state.calendar.selectedDate)) {
+        state.calendar.selectedDate = null;
+        const slots = document.getElementById('time-slots-container');
+        if (slots) slots.innerHTML = `<p class="text-sm text-gray-500">Wybierz datę z kalendarza, aby zobaczyć dostępne terminy.</p>`;
+    }
     // відновити виділення
     if (state.calendar.selectedDate) {
         const sel = cont.querySelector(`.calendar-day[data-date="${formatISO(state.calendar.selectedDate)}"]`);
@@ -384,21 +389,48 @@ function buildCalendar({ y, m, isAdmin }) {
         const dt = new Date(y, m, d);
         const iso = formatISO(dt);
         const isToday = formatISO(new Date()) === iso;
-        const appts = state.appointments.filter(a => a.date === iso);
-        const apptPreview = appts.slice(0, 2).map(a => `<div class="text-xs">${a.time}</div>`).join('');
-        const more = appts.length > 2 ? `<a data-action="show-day-details" data-date="${iso}" class="admin-calendar-more-link text-indigo-600 text-xs cursor-pointer">+${appts.length - 2}</a>` : '';
 
-        const dayAttrs = isAdmin
-            ? `tabindex="0" role="button" class="calendar-day available" data-action="show-day-details" data-date="${iso}" data-year="${y}" data-month="${m + 1}" data-day="${d}" data-is-admin="true"`
-            : `tabindex="0" role="button" class="calendar-day available" data-action="select-date" data-year="${y}" data-month="${m}" data-day="${d}" data-date="${iso}"`;
+        let dayAttrs = '';
+        if (isAdmin) {
+            // адмін завжди може відкрити день
+            dayAttrs = `tabindex="0" role="button" class="calendar-day available" data-action="show-day-details"
+                data-date="${iso}" data-year="${y}" data-month="${m + 1}" data-day="${d}" data-is-admin="true"`;
+        } else {
+            const available = hasFreeSlots(dt);
+            dayAttrs = available
+                ? `tabindex="0" role="button" class="calendar-day available" data-action="select-date"
+         data-year="${y}" data-month="${m}" data-day="${d}" data-date="${iso}"`
+                : `aria-disabled="true" class="calendar-day disabled" data-date="${iso}"`;
+        }
+
+        const appts = isAdmin ? state.appointments.filter(a => a.date === iso) : [];
+        const apptPreview = isAdmin ? appts.slice(0, 2).map(a => `<div class="text-xs">${a.time}</div>`).join('') : '';
+        const more = isAdmin && appts.length > 2
+            ? `<a data-action="show-day-details" data-date="${iso}" class="admin-calendar-more-link text-indigo-600 text-xs cursor-pointer">+${appts.length - 2}</a>`
+            : '';
 
         cells.push(`
-      <div ${dayAttrs}>
-        <span class="day-number">${d}${isToday ? ' •' : ''}</span>
-        ${isAdmin ? apptPreview + more : ''}
-      </div>`);
+    <div ${dayAttrs}>
+      <span class="day-number">${d}${isToday ? ' •' : ''}</span>
+      ${apptPreview}${more}
+    </div>`);
     }
 
-    const legend = isAdmin ? `<div class="calendar-legend"><span>• Kliknij dzień aby zobaczyć/zmienić wizyty</span></div>` : '';
+    const legend = isAdmin
+        ? `<div class="calendar-legend"><span>• Kliknij dzień aby zobaczyć/zmienić wizyty</span></div>`
+        : `<div class="calendar-legend">
+       <span><span class="inline-block w-3 h-3 rounded-sm align-middle bg-green-500 mr-1"></span> Dostępne</span>
+       <span><span class="inline-block w-3 h-3 rounded-sm align-middle bg-gray-300 mr-1 border border-dashed"></span> Niedostępne</span>
+     </div>`;
     return `<div class="custom-calendar">${nav}<div class="calendar-grid">${headers}${cells.join('')}</div>${legend}</div>`;
+}
+
+function hasFreeSlots(date) {
+    const weekday = date.getDay(); // 0..6
+    const daySlots = state.schedule[weekday] || [];
+    if (daySlots.length === 0) return false;
+    const dateKey = formatISO(date);
+    const booked = state.appointments.filter(a => a.date === dateKey).map(a => a.time);
+    const free = daySlots.filter(t => !booked.includes(t));
+    return free.length > 0;
 }

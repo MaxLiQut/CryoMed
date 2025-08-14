@@ -141,6 +141,7 @@ body {
 #client-info-container .dashboard-card {
     display: flex;
     flex-direction: column;
+    min-height: 0;
 }
 #client-info-container .dashboard-card .tab-container {
     flex: 0 0 auto;
@@ -151,8 +152,18 @@ body {
     overflow: hidden;
 }
 .card-scroll-content {
-    overflow-y: auto;
+    flex: 1 1 auto;
     min-height: 0;
+    height: 100%;
+    overflow-y: auto;
+}
+
+#client-scroll-container {
+    flex: 1 1 auto;
+    min-height: 0; /* дозволяє вкладеним блокам стискатись */
+    height: 100%; /* фіксує висоту для появи внутрішнього скролу */
+    display: flex;
+    flex-direction: column;
 }
 
 /* Theme toggle */
@@ -241,4 +252,32 @@ body {
 :root[data-theme='dark'] .bg-blue-600,
 :root[data-theme='dark'] .bg-green-600 {
     color: #fff !important;
+}
+
+.tab-content {
+    display: none;
+    height: 100%;
+}
+.tab-content.active {
+    display: block;
+    height: 100%;
+}
+
+/* Unavailable days (client calendar) */
+.calendar-day.disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+    border: 1px dashed #d1d5db;
+    cursor: not-allowed;
+    opacity: 0.75;
+}
+.calendar-day.disabled .day-number {
+    color: #9ca3af;
+}
+/* Темна тема */
+:root[data-theme='dark'] .calendar-day.disabled {
+    background: #111827;
+    color: #9ca3af;
+    border-color: #374151;
+    opacity: 0.7;
 }
